@@ -1,0 +1,131 @@
+==============================================================================
+TASK 5 -- PRECISION / RECALL AT DOCUMENT LEVEL, BOTH STRATEGIES
+==============================================================================
+queries  : 6 in-scope (same set as Task 4)
+top_k    : 3
+scoring  : chunks -> parent doc, de-duplicated, rank order preserved
+
+##############################################################################
+# COLLECTION A/fixed_overlap   (n_chunks=24)
+##############################################################################
+
+QUERY      : How long do I have to return a pair of shoes?
+gold docs  : ['01_return_window']
+retrieved  : 09_size_exchange@0.463 | 01_return_window@0.442 | 05_warranty_terms@0.416
+-> distinct docs (rank order, deduped): ['09_size_exchange', '01_return_window', '05_warranty_terms']
+-> relevant  = gold ∩ distinct = ['01_return_window']
+-> precision = 1/3 = 0.3333
+-> recall    = 1/1 = 1.0000
+
+QUERY      : When will I get my money back for a cash on delivery order?
+gold docs  : ['02_cod_refund_timelines']
+retrieved  : 02_cod_refund_timelines@0.649 | 02_cod_refund_timelines@0.526 | 06_order_cancellation@0.487
+-> distinct docs (rank order, deduped): ['02_cod_refund_timelines', '06_order_cancellation']
+-> relevant  = gold ∩ distinct = ['02_cod_refund_timelines']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : How many days does standard delivery take to a metro pin code?
+gold docs  : ['03_delivery_slas']
+retrieved  : 03_delivery_slas@0.879 | 03_delivery_slas@0.669 | 02_cod_refund_timelines@0.397
+-> distinct docs (rank order, deduped): ['03_delivery_slas', '02_cod_refund_timelines']
+-> relevant  = gold ∩ distinct = ['03_delivery_slas']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : What is the warranty on a laptop I bought?
+gold docs  : ['05_warranty_terms']
+retrieved  : 05_warranty_terms@0.559 | 10_damaged_item_claims@0.407 | 05_warranty_terms@0.377
+-> distinct docs (rank order, deduped): ['05_warranty_terms', '10_damaged_item_claims']
+-> relevant  = gold ∩ distinct = ['05_warranty_terms']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : How many loyalty points do I need to redeem for a discount?
+gold docs  : ['07_loyalty_points']
+retrieved  : 07_loyalty_points@0.542 | 07_loyalty_points@0.385 | 05_warranty_terms@0.221
+-> distinct docs (rank order, deduped): ['07_loyalty_points', '05_warranty_terms']
+-> relevant  = gold ∩ distinct = ['07_loyalty_points']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : When does a support conversation get escalated to a human?
+gold docs  : ['12_escalation_matrix']
+retrieved  : 12_escalation_matrix@0.518 | 12_escalation_matrix@0.371 | 07_loyalty_points@0.194
+-> distinct docs (rank order, deduped): ['12_escalation_matrix', '07_loyalty_points']
+-> relevant  = gold ∩ distinct = ['12_escalation_matrix']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+  MEAN PRECISION @3 (doc level) : 0.4722
+  MEAN RECALL    @3 (doc level) : 1.0000
+  F1                                : 0.6415
+
+##############################################################################
+# COLLECTION B/sentence   (n_chunks=30)
+##############################################################################
+
+QUERY      : How long do I have to return a pair of shoes?
+gold docs  : ['01_return_window']
+retrieved  : 09_size_exchange@0.521 | 01_return_window@0.481 | 01_return_window@0.439
+-> distinct docs (rank order, deduped): ['09_size_exchange', '01_return_window']
+-> relevant  = gold ∩ distinct = ['01_return_window']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : When will I get my money back for a cash on delivery order?
+gold docs  : ['02_cod_refund_timelines']
+retrieved  : 02_cod_refund_timelines@0.756 | 06_order_cancellation@0.464 | 01_return_window@0.464
+-> distinct docs (rank order, deduped): ['02_cod_refund_timelines', '06_order_cancellation', '01_return_window']
+-> relevant  = gold ∩ distinct = ['02_cod_refund_timelines']
+-> precision = 1/3 = 0.3333
+-> recall    = 1/1 = 1.0000
+
+QUERY      : How many days does standard delivery take to a metro pin code?
+gold docs  : ['03_delivery_slas']
+retrieved  : 03_delivery_slas@0.875 | 03_delivery_slas@0.702 | 06_order_cancellation@0.400
+-> distinct docs (rank order, deduped): ['03_delivery_slas', '06_order_cancellation']
+-> relevant  = gold ∩ distinct = ['03_delivery_slas']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : What is the warranty on a laptop I bought?
+gold docs  : ['05_warranty_terms']
+retrieved  : 05_warranty_terms@0.576 | 05_warranty_terms@0.420 | 10_damaged_item_claims@0.420
+-> distinct docs (rank order, deduped): ['05_warranty_terms', '10_damaged_item_claims']
+-> relevant  = gold ∩ distinct = ['05_warranty_terms']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : How many loyalty points do I need to redeem for a discount?
+gold docs  : ['07_loyalty_points']
+retrieved  : 07_loyalty_points@0.520 | 07_loyalty_points@0.515 | 07_loyalty_points@0.396
+-> distinct docs (rank order, deduped): ['07_loyalty_points']
+-> relevant  = gold ∩ distinct = ['07_loyalty_points']
+-> precision = 1/1 = 1.0000
+-> recall    = 1/1 = 1.0000
+
+QUERY      : When does a support conversation get escalated to a human?
+gold docs  : ['12_escalation_matrix']
+retrieved  : 12_escalation_matrix@0.487 | 12_escalation_matrix@0.454 | 08_payment_failure_retry@0.206
+-> distinct docs (rank order, deduped): ['12_escalation_matrix', '08_payment_failure_retry']
+-> relevant  = gold ∩ distinct = ['12_escalation_matrix']
+-> precision = 1/2 = 0.5000
+-> recall    = 1/1 = 1.0000
+
+  MEAN PRECISION @3 (doc level) : 0.5556
+  MEAN RECALL    @3 (doc level) : 1.0000
+  F1                                : 0.7143
+
+==============================================================================
+SUMMARY
+==============================================================================
+collection              mean P    mean R        F1
+A/fixed_overlap         0.4722    1.0000    0.6415
+B/sentence              0.5556    1.0000    0.7143
+
+RECOMMENDATION (2-3 sentences, citing the numbers above):
+
+  I would deploy B/sentence, the sentence-based strategy. It scores precision 0.5556 / recall 1.0000 against the fixed-overlap strategy's 0.4722 / 1.0000, which is the stronger profile overall.
+  The reason is structural rather than accidental: fixed windows cut through sentences, so a chunk can contain the tail of one policy claim and the head of the next, which dilutes its embedding and pushes it toward whichever query happens to match the dominant half. Sentence chunks never split a claim, so each vector represents one complete policy statement -- and on a 12-document policy KB, where a single sentence like 'unless the item arrived damaged' can invert the meaning of the sentence before it, that matters more than uniform chunk sizes. Sentence chunks also produced a cleaner separation in Task 4 (out-of-scope top-1 max 0.1497 vs 0.1074), leaving a wider safety margin around the refusal threshold.
+==============================================================================

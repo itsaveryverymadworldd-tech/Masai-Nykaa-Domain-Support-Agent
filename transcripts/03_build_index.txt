@@ -1,0 +1,63 @@
+==============================================================================
+TASK 3 REPORT -- chunking, embedding, two ChromaDB collections
+==============================================================================
+embedding model : sentence-transformers/all-MiniLM-L6-v2
+chunk size      : 90 words, overlap 25 words (strategy A)
+sentence group  : 2 sentences per chunk (strategy B)
+
+knowledge base  : 12 documents from kb/
+    01_return_window                 Return Window by Product Category
+    02_cod_refund_timelines          COD Refund Timelines
+    03_delivery_slas                 Delivery SLAs
+    04_reverse_pickup_eligibility    Reverse-Pickup Eligibility
+    05_warranty_terms                Warranty Terms by Category
+    06_order_cancellation            Order-Cancellation Policy
+    07_loyalty_points                Loyalty-Points Redemption Policy
+    08_payment_failure_retry         Payment-Failure and Retry Policy
+    09_size_exchange                 Size-Exchange Policy
+    10_damaged_item_claims           Damaged-Item Claim Process
+    11_international_shipping        International Shipping Restrictions
+    12_escalation_matrix             Customer-Support Escalation Matrix
+
+Strategy A -- fixed-size with overlap
+    n_chunks     24
+    n_docs       12
+    min_words    29
+    max_words    90
+    mean_words   65.7
+    strategy     fixed_overlap
+    collection   kb_fixed_overlap (count=24)
+
+Strategy B -- sentence-based
+    n_chunks     30
+    n_docs       12
+    min_words    14
+    max_words    66
+    mean_words   42.5
+    strategy     sentence
+    collection   kb_sentence (count=30)
+
+------------------------------------------------------------------------------
+SAMPLE QUERY (proves both collections retrieve sensibly):
+  "How long do I have to return a pair of shoes?"
+------------------------------------------------------------------------------
+
+[A/kb_fixed_overlap]
+    0.4632  09_size_exchange                 09_size_exchange::fixed::0
+            Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replaceme...
+    0.4418  01_return_window                 01_return_window::fixed::0
+            Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date ...
+    0.4158  05_warranty_terms                05_warranty_terms::fixed::0
+            Warranty is a separate entitlement from the return window and does not extend it. Electronics carry the manufa...
+
+[B/kb_sentence]
+    0.5211  09_size_exchange                 09_size_exchange::sent::0
+            Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replaceme...
+    0.4807  01_return_window                 01_return_window::sent::1
+            Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may onl...
+    0.4388  01_return_window                 01_return_window::sent::0
+            Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date ...
+
+==============================================================================
+PASS -- both strategies chunked, embedded and indexed separately.
+==============================================================================

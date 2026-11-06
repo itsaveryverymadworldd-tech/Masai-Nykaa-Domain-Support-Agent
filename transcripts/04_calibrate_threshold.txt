@@ -1,0 +1,59 @@
+==============================================================================
+TASK 4 -- EMPIRICAL CALIBRATION OF THE 'I DON'T KNOW' THRESHOLD
+==============================================================================
+No preset is used. The threshold is derived from the two clusters below.
+
+------------------------------------------------------------------------------
+COLLECTION A/fixed_overlap
+------------------------------------------------------------------------------
+  IN-SCOPE (must be answerable):
+    0.4632   How long do I have to return a pair of shoes?
+    0.6492   When will I get my money back for a cash on delivery order?
+    0.8792   How many days does standard delivery take to a metro pin code?
+    0.5595   What is the warranty on a laptop I bought?
+    0.5424   How many loyalty points do I need to redeem for a discount?
+    0.5182   When does a support conversation get escalated to a human?
+  OUT-OF-SCOPE (must fall back):
+    0.0714   How do I install the latest NVIDIA CUDA driver on Ubuntu?
+    0.0490   What is the capital of Australia?
+    0.1074   Can you write me a Python function that sorts a list of integers?
+    0.1013   Who won the 2019 Cricket World Cup final?
+
+  lowest  in-scope  top-1 : 0.4632
+  highest out-scope top-1 : 0.1074
+  gap between clusters    : +0.3559
+  clusters separate. Midpoint threshold = 0.2853
+
+------------------------------------------------------------------------------
+COLLECTION B/sentence
+------------------------------------------------------------------------------
+  IN-SCOPE (must be answerable):
+    0.5211   How long do I have to return a pair of shoes?
+    0.7559   When will I get my money back for a cash on delivery order?
+    0.8748   How many days does standard delivery take to a metro pin code?
+    0.5757   What is the warranty on a laptop I bought?
+    0.5196   How many loyalty points do I need to redeem for a discount?
+    0.4868   When does a support conversation get escalated to a human?
+  OUT-OF-SCOPE (must fall back):
+    0.0672   How do I install the latest NVIDIA CUDA driver on Ubuntu?
+    0.1100   What is the capital of Australia?
+    0.1497   Can you write me a Python function that sorts a list of integers?
+    0.1260   Who won the 2019 Cricket World Cup final?
+
+  lowest  in-scope  top-1 : 0.4868
+  highest out-scope top-1 : 0.1497
+  gap between clusters    : +0.3371
+  clusters separate. Midpoint threshold = 0.3182
+
+==============================================================================
+RECOMMENDED THRESHOLDS
+==============================================================================
+  A/fixed_overlap    0.2853
+  B/sentence         0.3182
+
+  DEPLOYED (conservative = max of the two): 0.3182
+
+Measured values for README.md:
+  A/fixed_overlap: in-scope top-1 0.4632-0.8792, out-of-scope top-1 max 0.1074, threshold 0.2853
+  B/sentence: in-scope top-1 0.4868-0.8748, out-of-scope top-1 max 0.1497, threshold 0.3182
+==============================================================================

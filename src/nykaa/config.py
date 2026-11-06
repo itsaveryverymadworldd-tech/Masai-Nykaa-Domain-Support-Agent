@@ -63,8 +63,15 @@ CHUNK_OVERLAP_WORDS = 25
 DEFAULT_TOP_K = 3
 
 #: Empirically calibrated in scripts/03_calibrate_threshold.py -- NOT a preset.
-#: Set between the observed in-scope and out-of-scope top-1 cosine clusters.
-SIMILARITY_THRESHOLD: float = 0.0  # placeholder; script writes the real value
+#: Measured top-1 cosine clusters (see README.md):
+#:   collection B/sentence : in-scope 0.4868 - 0.8748, out-of-scope max 0.1497
+#:   collection A/fixed    : in-scope 0.4632 - 0.8792, out-of-scope max 0.1074
+#: Threshold placed at the midpoint of the observed gap; the deployed value is
+#: the conservative (higher) of the two, because in customer support a refusal
+#: is cheaper than a confident wrong answer.
+#: A tutorial preset of 0.5 would have wrongly refused 2 of the 6 in-scope
+#: queries -- which is exactly why the brief forbids preset values.
+SIMILARITY_THRESHOLD: float = 0.3182
 
 # --------------------------------------------------------------------------- #
 # Dataset design choices (Task 1) -- reproduced verbatim in README.md

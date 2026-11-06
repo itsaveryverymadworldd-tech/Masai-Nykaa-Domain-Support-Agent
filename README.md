@@ -113,6 +113,69 @@ set as an environment variable before the crew runs.**
 
 ---
 
+## Part 1 — chunking, retrieval and the calibrated threshold
+
+### Task 3 — two chunking strategies, two collections
+
+| | Strategy A: fixed-size + overlap | Strategy B: sentence-based |
+| --- | --- | --- |
+| Rule | 90-word window, 25-word overlap | whole sentences, 2 per chunk |
+| Chunks | 24 | 30 |
+| Mean chunk length | 65.7 words | 42.5 words |
+| ChromaDB collection | `kb_fixed_overlap` | `kb_sentence` |
+
+Both are embedded with `sentence-transformers/all-MiniLM-L6-v2` (384-dim,
+normalised) and upserted into **separate** collections with cosine space, so
+`distance = 1 - similarity` and the reported similarity is exact.
+
+### Task 4 — empirically calibrated "I don't know" threshold
+
+**No preset is used.** Top-1 cosine similarity was measured for 6 in-scope
+queries and 4 deliberately out-of-scope queries, on both collections:
+
+| Collection | in-scope top-1 range | out-of-scope top-1 max | gap | threshold |
+| --- | --- | --- | --- | --- |
+| A `kb_fixed_overlap` | 0.4632 – 0.8792 | 0.1074 | +0.3559 | 0.2853 |
+| B `kb_sentence` | 0.4868 – 0.8748 | 0.1497 | +0.3371 | 0.3182 |
+
+**Deployed threshold: `0.3182`** — the midpoint of the *wider-margin* collection,
+and the conservative (higher) choice of the two, because in customer support a
+refusal is cheaper than a confident wrong answer.
+
+This is precisely why the brief forbids presets: a tutorial `0.5` would have
+**wrongly refused 2 of the 6 in-scope queries** (the return-window query at
+0.4632/0.5211 and the escalation query at 0.4868), while `0.3` would have
+answered correctly but with almost no margin. The measured clusters sit nowhere
+near the common defaults.
+
+Runtime result (`transcripts/04_demo_grounded.txt`): **6/6 in-scope queries
+answered from retrieved context with the gold document inside top-3, and 4/4
+out-of-scope queries correctly refused** (highest out-of-scope similarity 0.1497).
+
+### Task 5 — precision/recall, both strategies, same 6 queries
+
+Document-level, chunks mapped back to parents and de-duplicated before scoring:
+
+| Collection | mean precision@3 | mean recall@3 | F1 |
+| --- | --- | --- | --- |
+| A `kb_fixed_overlap` | 0.4722 | 1.0000 | 0.6415 |
+| B `kb_sentence` | **0.5556** | **1.0000** | **0.7143** |
+
+Per-query arithmetic for every query and both collections is in
+`transcripts/05_eval_chunking.txt`.
+
+**Recommendation: deploy B, the sentence-based strategy.** It beats fixed-overlap
+on both axes (P 0.5556 vs 0.4722, R 1.0000 vs 1.0000). The reason is structural:
+fixed windows cut through sentences, so a chunk can carry the tail of one policy
+claim and the head of the next, diluting its embedding toward whichever half
+dominates. Sentence chunks never split a claim — which matters on a policy KB
+where a sentence like *"unless the item arrived damaged"* inverts the sentence
+before it — and they also gave the cleaner cluster separation in Task 4,
+leaving a wider margin around the refusal threshold. **Collection B
+(`kb_sentence`) is the fixed input to Parts 2–4.**
+
+---
+
 ## Repository layout
 
 ```

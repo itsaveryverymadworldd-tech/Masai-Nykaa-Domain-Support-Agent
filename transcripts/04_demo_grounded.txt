@@ -1,0 +1,115 @@
+==============================================================================
+TASK 4 -- GROUNDED GENERATION + 'I DON'T KNOW' FALLBACK
+==============================================================================
+collection      : kb_sentence
+threshold       : 0.3182  (empirically calibrated, not a preset)
+top-k           : 3
+queries         : 6 in-scope + 4 out-of-scope
+
+##############################################################################
+# IN-SCOPE QUERIES  (must be ANSWERED from retrieved context)
+##############################################################################
+
+QUERY        : How long do I have to return a pair of shoes?
+topic        : return window by product category
+gold doc     : 01_return_window
+top-1 sim    : 0.5211  vs threshold 0.3182
+answered     : True
+retrieved    : 09_size_exchange (0.521), 01_return_window (0.481), 01_return_window (0.439)
+gold in top-3 : True
+ANSWER       : Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be return
+------------------------------------------------------------------------------
+
+QUERY        : When will I get my money back for a cash on delivery order?
+topic        : COD refund timelines
+gold doc     : 02_cod_refund_timelines
+top-1 sim    : 0.7559  vs threshold 0.3182
+answered     : True
+retrieved    : 02_cod_refund_timelines (0.756), 06_order_cancellation (0.464), 01_return_window (0.464)
+gold in top-3 : True
+ANSWER       : Cash-on-delivery orders are always refunded electronically to the customer's bank account or UPI handle; refunds are never paid out in cash by the delivery partner. Once the returned item passes quality inspection at the warehouse, the refund is initiated within 24 hours. Orders cancelled before dis
+------------------------------------------------------------------------------
+
+QUERY        : How many days does standard delivery take to a metro pin code?
+topic        : delivery SLAs
+gold doc     : 03_delivery_slas
+top-1 sim    : 0.8748  vs threshold 0.3182
+answered     : True
+retrieved    : 03_delivery_slas (0.875), 03_delivery_slas (0.702), 06_order_cancellation (0.400)
+gold in top-3 : True
+ANSWER       : Standard delivery is promised within 3 to 5 working days for metro pin codes and 5 to 8 working days for the rest of the country. A shipment is treated as delayed once its tracking has not advanced for 48 hours past the last scan, or once the promised window has passed while the order is still in Pl
+------------------------------------------------------------------------------
+
+QUERY        : What is the warranty on a laptop I bought?
+topic        : warranty terms by category
+gold doc     : 05_warranty_terms
+top-1 sim    : 0.5757  vs threshold 0.3182
+answered     : True
+retrieved    : 05_warranty_terms (0.576), 05_warranty_terms (0.420), 10_damaged_item_claims (0.420)
+gold in top-3 : True
+ANSWER       : Warranty is a separate entitlement from the return window and does not extend it. Electronics carry the manufacturer's warranty, typically 12 months from delivery, covering manufacturing defects only and explicitly not accidental damage. Home appliances run from 12 to 24 months depending on the bran
+------------------------------------------------------------------------------
+
+QUERY        : How many loyalty points do I need to redeem for a discount?
+topic        : loyalty-points redemption policy
+gold doc     : 07_loyalty_points
+top-1 sim    : 0.5196  vs threshold 0.3182
+answered     : True
+retrieved    : 07_loyalty_points (0.520), 07_loyalty_points (0.515), 07_loyalty_points (0.396)
+gold in top-3 : True
+ANSWER       : Redemption is permitted in multiples of 100 points, with each point worth one rupee of order value. A maximum of 30 percent of an order's total value may be settled using points; the remainder must be paid by a normal payment method. Nykaa Prive loyalty points are earned on the net paid value of Del
+------------------------------------------------------------------------------
+
+QUERY        : When does a support conversation get escalated to a human?
+topic        : customer-support escalation matrix
+gold doc     : 12_escalation_matrix
+top-1 sim    : 0.4868  vs threshold 0.3182
+answered     : True
+retrieved    : 12_escalation_matrix (0.487), 12_escalation_matrix (0.454), 08_payment_failure_retry (0.206)
+gold in top-3 : True
+ANSWER       : A conversation escalates to Tier 2 when the order's escalation score is at or above the configured threshold, when a delayed order has a value above Rs.10,000, or when the customer has contacted support three or more times about the same order. Tier 3 is the resolution desk and handles legal threats
+------------------------------------------------------------------------------
+
+##############################################################################
+# OUT-OF-SCOPE QUERIES  (must trigger the FALLBACK / refusal)
+##############################################################################
+
+QUERY        : How do I install the latest NVIDIA CUDA driver on Ubuntu?
+top-1 sim    : 0.0672  vs threshold 0.3182
+answered     : False
+nearest doc  : 08_payment_failure_retry  (the forced nearest neighbour, similarity 0.0672)
+RESPONSE     : I don't have that in the Nykaa policy knowledge base, so I can't answer it reliably. I'd rather say I don't know than guess. Let me route this to a human suppor
+VERDICT      : FALLBACK CORRECT
+------------------------------------------------------------------------------
+
+QUERY        : What is the capital of Australia?
+top-1 sim    : 0.1100  vs threshold 0.3182
+answered     : False
+nearest doc  : 07_loyalty_points  (the forced nearest neighbour, similarity 0.1100)
+RESPONSE     : I don't have that in the Nykaa policy knowledge base, so I can't answer it reliably. I'd rather say I don't know than guess. Let me route this to a human suppor
+VERDICT      : FALLBACK CORRECT
+------------------------------------------------------------------------------
+
+QUERY        : Can you write me a Python function that sorts a list of integers?
+top-1 sim    : 0.1497  vs threshold 0.3182
+answered     : False
+nearest doc  : 09_size_exchange  (the forced nearest neighbour, similarity 0.1497)
+RESPONSE     : I don't have that in the Nykaa policy knowledge base, so I can't answer it reliably. I'd rather say I don't know than guess. Let me route this to a human suppor
+VERDICT      : FALLBACK CORRECT
+------------------------------------------------------------------------------
+
+QUERY        : Who won the 2019 Cricket World Cup final?
+top-1 sim    : 0.1260  vs threshold 0.3182
+answered     : False
+nearest doc  : 07_loyalty_points  (the forced nearest neighbour, similarity 0.1260)
+RESPONSE     : I don't have that in the Nykaa policy knowledge base, so I can't answer it reliably. I'd rather say I don't know than guess. Let me route this to a human suppor
+VERDICT      : FALLBACK CORRECT
+------------------------------------------------------------------------------
+
+==============================================================================
+RESULT: PASS
+  6/6 in-scope queries answered from retrieved context,
+  every gold document retrieved inside top-3.
+  4/4 out-of-scope queries correctly triggered
+  the 'I don't know' fallback (highest out-of-scope similarity 0.1497 < threshold 0.3182).
+==============================================================================
