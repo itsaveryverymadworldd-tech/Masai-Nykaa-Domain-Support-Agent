@@ -1,0 +1,3 @@
+# COD Refund Timelines
+
+Cash-on-delivery orders are always refunded electronically to the customer's bank account or UPI handle; refunds are never paid out in cash by the delivery partner. Once the returned item passes quality inspection at the warehouse, the refund is initiated within 24 hours. Bank settlement typically takes 3 to 5 working days for COD orders, and up to 7 working days when the original COD collection was routed through a third-party collection partner. Note that an order showing Refunded status has had the refund initiated but does not mean the money has reached the customer's account yet; the remaining time is bank settlement.

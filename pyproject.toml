@@ -1,0 +1,52 @@
+[project]
+name = "nykaa-support-agent"
+version = "0.1.0"
+description = "Final Capstone — Nykaa Domain Support Agent (CrewAI). Runs fully under MOCK_LLM: zero API keys, zero network."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # --- Part 1: retrieval core ---
+    "chromadb",
+    "sentence-transformers",
+    # torch is declared directly (not left transitive via sentence-transformers)
+    # so that [tool.uv.sources] below can redirect it to the CPU-only index --
+    # uv.sources only applies to direct dependencies.
+    "torch",
+    # --- Part 2: CrewAI orchestration + LangChain session memory ---
+    "crewai",
+    "langchain-core",
+    # --- Part 4: independent Autogen review stage ---
+    "autogen-agentchat",
+    # --- Part 3: FastAPI deployment ---
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "websockets",
+    # --- shared across all parts ---
+    "pydantic",
+]
+
+# --------------------------------------------------------------------------- #
+# CPU-only PyTorch.
+#
+# sentence-transformers depends on torch. PyPI's default torch wheel bundles
+# multi-GB CUDA runtime libraries (nvidia-cu13-*, ~7 GB) that this project never
+# uses -- embeddings run on CPU. Mapping torch to PyTorch's dedicated CPU index
+# takes the install from ~7 GB to a few hundred MB, and means the grader does
+# not need a GPU.
+#
+# IMPORTANT: this mapping only takes effect on a FRESH resolution. After editing
+# it you must delete uv.lock (or run `uv lock -U`). A stale lock is reused
+# verbatim and will silently keep resolving the CUDA build.
+# --------------------------------------------------------------------------- #
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[tool.uv]
+package = false
+

@@ -1,0 +1,3 @@
+# Reverse-Pickup Eligibility
+
+Reverse pickup is the door-step collection of a return from the customer's address, and it is serviceable at roughly 19,000 pin codes. The item must be handed over in its original packaging with all tags, accessories and free gifts included. Apparel, Footwear, Beauty and most Home items are pickup eligible, whereas large Electronics such as televisions, refrigerators and washing machines must instead be returned through a scheduled engineer visit. Orders that fail two consecutive pickup attempts are converted into customer drop-off returns, for which the customer ships the item back and the return window is not extended.

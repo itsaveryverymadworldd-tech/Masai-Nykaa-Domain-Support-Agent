@@ -1,0 +1,3 @@
+# Delivery SLAs
+
+Standard delivery is promised within 3 to 5 working days for metro pin codes and 5 to 8 working days for the rest of the country. A shipment is treated as delayed once its tracking has not advanced for 48 hours past the last scan, or once the promised window has passed while the order is still in Placed or Shipped status. Express delivery, where the pin code is serviceable for it, is a 1 to 2 working day service. Deliveries may be interrupted by weather events, transport strikes or peak seasonal volume, and the delivery SLA clock restarts from the moment the shipment clears the disruption.

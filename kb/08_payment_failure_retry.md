@@ -1,0 +1,3 @@
+# Payment-Failure and Retry Policy
+
+When a payment fails, the order does not move into Placed status and no inventory is reserved for the customer, so the item may sell out while the customer retries. The customer may retry immediately with the same card or with a different payment method; there is no retry limit and no penalty. A failed authorisation is reversed automatically by the issuing bank, normally within 5 to 7 working days, so a failed payment does not need to be raised as a refund. Where the same order has been debited twice, the duplicate is reconciled and refunded automatically without the customer needing to raise a request. Support agents must never ask a customer for a full card number or a CVV while helping with a failed payment.

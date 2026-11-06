@@ -1,0 +1,3 @@
+# Warranty Terms by Category
+
+Warranty is a separate entitlement from the return window and does not extend it. Electronics carry the manufacturer's warranty, typically 12 months from delivery, covering manufacturing defects only and explicitly not accidental damage. Home appliances run from 12 to 24 months depending on the brand, and Beauty devices such as trimmers, hair dryers and straighteners carry 6 to 12 months. Apparel, Footwear and cosmetics are not warrantied at all; for these categories the remedy is the return or size-exchange policy instead. Every warranty claim requires the original invoice number, which is why support agents should always ask for the order record rather than a photograph of the item.

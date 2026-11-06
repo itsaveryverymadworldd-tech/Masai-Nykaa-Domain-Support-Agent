@@ -1,0 +1,3 @@
+# Loyalty-Points Redemption Policy
+
+Nykaa Prive loyalty points are earned on the net paid value of Delivered orders only. Points are not awarded on Returned, Refunded or cancelled orders, and any points already credited against an order that is later returned are clawed back from the balance. Redemption is permitted in multiples of 100 points, with each point worth one rupee of order value. A maximum of 30 percent of an order's total value may be settled using points; the remainder must be paid by a normal payment method. Points expire 12 months after the date they were credited, and expired points cannot be reinstated by a support agent.

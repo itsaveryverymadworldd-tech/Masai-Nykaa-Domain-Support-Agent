@@ -1,0 +1,3 @@
+# Return Window by Product Category
+
+Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date the order was placed. Apparel, Footwear and Beauty items may be returned within 7 days of delivery. Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Requests arriving after the window has closed are declined, unless the item itself arrived damaged, in which case the damaged-item process takes precedence.

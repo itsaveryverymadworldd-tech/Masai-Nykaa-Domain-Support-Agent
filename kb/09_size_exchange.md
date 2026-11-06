@@ -1,0 +1,3 @@
+# Size-Exchange Policy
+
+Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. The first size exchange on any order is free of charge; any subsequent exchange within the same order carries a delivery fee that is deducted at dispatch. Exchanges are always subject to stock availability, and if the requested size is out of stock the exchange converts into a standard return with a full refund. Beauty, Home and Electronics items cannot be size-exchanged because they have no size variant.

@@ -1,0 +1,3 @@
+# International Shipping Restrictions
+
+Nykaa ships within India only and does not offer international delivery on any category. An order cannot be placed with a delivery address outside India, and pin codes that fall outside the serviceable list are rejected at checkout rather than accepted and failed later. International credit cards may be used to pay for an order, but the delivery address must still be domestic, so a foreign billing address alone does not make an order international. Customers who have moved abroad are advised to return the item under the standard category return window and place a fresh domestic order to an Indian address.

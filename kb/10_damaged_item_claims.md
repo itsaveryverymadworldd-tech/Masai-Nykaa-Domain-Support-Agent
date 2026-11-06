@@ -1,0 +1,3 @@
+# Damaged-Item Claim Process
+
+A damaged, defective or wrong item must be reported within 48 hours of delivery. The customer should keep the original packaging and shipping label until the claim is closed, and should upload photographs showing the item, the damage and the label together. Once the claim is verified by the warehouse team, the customer chooses between a free replacement and a full refund, and the replacement is prioritised over the refund where stock allows. Claims raised after the 48-hour reporting window are assessed under the warranty terms if the category carries a warranty; categories without a warranty cannot be compensated after the window closes.
