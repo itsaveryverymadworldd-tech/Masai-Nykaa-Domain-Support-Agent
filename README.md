@@ -284,6 +284,77 @@ never by tool name.
 
 ---
 
+## Part 3 — FastAPI deployment, structured logging, evaluation
+
+### Task 11 — FastAPI endpoints
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | `/ask` | one grounded crew turn; input guardrails run first |
+| POST | `/add-document` | append a KB document and re-index **both** collections |
+| WS | `/ws/chat` | real-time multi-turn chat with per-session memory |
+| GET | `/health` | liveness and effective configuration |
+
+Pydantic request/response models on every HTTP endpoint. The WebSocket handler
+catches `WebSocketDisconnect` and returns cleanly, so a client dropping
+mid-conversation never affects other clients — demonstrated in
+`transcripts/11_12_api_and_logging.txt` by having client 1 close the socket
+mid-conversation and then serving client 2 successfully afterwards.
+
+**crewai 1.x gotcha found here:** a synchronous `crew.kickoff()` raises
+`RuntimeError: Agent execution was invoked synchronously from within a running
+event loop` when called from an async handler. The blocking crew is therefore
+dispatched with `starlette.concurrency.run_in_threadpool`.
+
+### Task 12 — structured JSON-Lines logging
+
+One JSON object per line, with `trace_id`, `duration_ms` and status, written to
+`data/requests.jsonl`. From the transcript: **9 requests → 9 entries, 9/9 with a
+trace id and timing.**
+
+The same `mask_pii` used on the model input is applied before writing, so the
+log check reports:
+
+```
+whole-file search (phone forms)  : NONE
+request_text search (card last4) : NONE
+[OK] no raw fixed-format PII value reached disk
+```
+
+...while the masked form is present, proving masking ran rather than being
+skipped: `My number is [PHONE_REDACTED] and the card [CARD_LAST4_REDACTED] was
+charged twice.`
+
+### Task 13 — evaluation: 15 queries × four properties
+
+12 in-scope queries (**one per required KB topic**), 1 order-lookup query, and 2
+deliberately out-of-scope queries.
+
+| | Accuracy | Grounding | Completeness | Safety |
+| --- | --- | --- | --- | --- |
+| **Average over 15** | **1.0000** | **1.0000** | **1.0000** | **1.0000** |
+
+Per-query scores: `transcripts/13_eval_scores.json`; full transcript with the
+evidence behind every score: `transcripts/13_eval_judge.txt`.
+
+The judge is structured as a real LLM judge — a rubric prompt
+(`JUDGE_PROMPT` in `src/nykaa/judge.py`) plus a per-case evidence bundle — but
+**under MOCK_LLM it is answered by a deterministic rubric evaluator, not a
+language model.** That is stated plainly in the module docstring rather than
+dressed up: the scores are a reproducible rubric evaluation. Wiring a real model
+in would send that prompt instead.
+
+**The evaluation found a real defect.** The first run scored 0.9167, and the
+per-query evidence showed why: for two topics (COD refunds, escalation matrix)
+the **top-ranked chunk was from the correct document, but the expected fact sat
+in a sibling chunk ranked 4th–5th**. The fix is **document expansion** at
+generation time — once the top match identifies a document, that document's
+other chunks are pulled into the context too. Accuracy then went 0.8667 → 1.0000
+and completeness 0.8000 → 1.0000. Task 5's precision/recall is unaffected,
+because it measures retrieval *ranking*, which is unchanged.
+
+---
+
 ## Repository layout
 
 ```

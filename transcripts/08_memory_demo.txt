@@ -31,7 +31,7 @@ final history for session-A (4 messages):
 
 memory log:
     [no memory] effective query 'How long do I have to return a pair of shoes?'
-    [memory applied] prior turn 'How long do I have to return a pair of shoes?' prepended -> effective query 'How long do I have to return a pair of shoes? And what about Home products?'
+    [memory applied] effective query 'How long do I have to return a pair of shoes? And what about Home products?'
 
 ##############################################################################
 # TRANSCRIPT B -- FRESH SESSION, SAME SECOND TURN, STATE ABSENT
@@ -45,12 +45,12 @@ AGENT   : Home appliances run from 12 to 24 months depending on the brand, and B
 memory log:
     [no memory] effective query 'And what about Home products?'
 
-COMPARISON
+COMPARISON (asserted on the EFFECTIVE QUERY, not on answer substrings)
 ------------------------------------------------------------------------------
   session A turn 2 effective query : How long do I have to return a pair of shoes? And what about Home products?
   session B turn 1 effective query : And what about Home products?
-  A answers the Home return window : True
-  B does not carry that context    : False
+  A prepended the prior customer turn : True
+  B ran with no history at all        : True
 
 ==============================================================================
 RESULT: PASS

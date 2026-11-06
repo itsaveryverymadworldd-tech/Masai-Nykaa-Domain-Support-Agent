@@ -33,7 +33,7 @@ tools invoked on this query: ['rag_lookup']
 
 FINAL CREW OUTPUT (validated against the Pydantic schema):
 {
-  "answer": "Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date the order was placed. Apparel, Footwear and Beauty items may be returned within 7 days of delivery.\n\n(Answered from: Return Window by Product Category, Size-Exchange Policy. Top match similarity 0.521 >= threshold 0.318.)",
+  "answer": "Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date the order was placed. Apparel, Footwear and Beauty items may be returned within 7 days of delivery. The first size exchange on any order is free of charge; any subsequent exchange within the same order carries a delivery fee that is deducted at dispatch. Exchanges are always subject to stock availability, and if the requested size is out of stock the exchange converts into a standard return with a full refund. Beauty, Home and Electronics items cannot be size-exchanged because they have no size variant. Requests arriving after the window has closed are declined, unless the item itself arrived damaged, in which case the damaged-item process takes precedence.\n\n(Answered from: Return Window by Product Category, Size-Exchange Policy. Top match similarity 0.521 >= threshold 0.318.)",
   "grounded": true,
   "sources": [
     "09_size_exchange",
@@ -84,7 +84,7 @@ FINAL CREW OUTPUT (validated against the Pydantic schema):
   "order_status": "Shipped",
   "escalation_score": 0.697964,
   "needs_human": true,
-  "reason": "the knowledge base does not cover this question"
+  "reason": "the knowledge base does not cover this question; the order's escalation score is at or above the policy threshold"
 }
 
   [OK] response validates against SupportResponse

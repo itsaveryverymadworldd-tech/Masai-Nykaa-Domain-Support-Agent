@@ -90,7 +90,7 @@ groundedness : supported=True coverage=1.0
 
 --- same answer with a DELIBERATELY INJECTED ungrounded claim ---
 INJECTED CLAIM: 'Nykaa also offers a lifetime return window of 365 days on all Electronics purchased through the mobile app.'
-groundedness : supported=False coverage=0.9082
+groundedness : supported=False coverage=0.9416
                1 sentence(s) fall below 75% token coverage of the retrieved context
                unsupported sentence(s):
                  - Nykaa also offers a lifetime return window of 365 days on all Electronics purchased through the mobile app....

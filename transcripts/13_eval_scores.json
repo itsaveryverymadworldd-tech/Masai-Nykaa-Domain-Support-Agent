@@ -1,0 +1,269 @@
+{
+  "per_query": [
+    {
+      "case_id": "T01",
+      "topic": "return window by product category",
+      "kind": "in_scope",
+      "query": "How long do I have to return a pair of shoes?",
+      "answered": true,
+      "top_similarity": 0.5211,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['7 days of delivery']"
+      ]
+    },
+    {
+      "case_id": "T02",
+      "topic": "COD refund timelines",
+      "kind": "in_scope",
+      "query": "When will I get my money back for a cash on delivery order?",
+      "answered": true,
+      "top_similarity": 0.7559,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['3 to 5 working days']"
+      ]
+    },
+    {
+      "case_id": "T03",
+      "topic": "delivery SLAs",
+      "kind": "in_scope",
+      "query": "How many days does standard delivery take to a metro pin code?",
+      "answered": true,
+      "top_similarity": 0.8748,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['3 to 5 working days']"
+      ]
+    },
+    {
+      "case_id": "T04",
+      "topic": "reverse-pickup eligibility",
+      "kind": "in_scope",
+      "query": "Can a return be picked up from my home address?",
+      "answered": true,
+      "top_similarity": 0.5563,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['19,000 pin codes']"
+      ]
+    },
+    {
+      "case_id": "T05",
+      "topic": "warranty terms by category",
+      "kind": "in_scope",
+      "query": "What is the warranty on a laptop I bought?",
+      "answered": true,
+      "top_similarity": 0.5757,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['12 months']"
+      ]
+    },
+    {
+      "case_id": "T06",
+      "topic": "order-cancellation policy",
+      "kind": "in_scope",
+      "query": "Can I cancel an order that has already been shipped?",
+      "answered": true,
+      "top_similarity": 0.7153,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['no longer possible']"
+      ]
+    },
+    {
+      "case_id": "T07",
+      "topic": "loyalty-points redemption policy",
+      "kind": "in_scope",
+      "query": "How many loyalty points do I need to redeem for a discount?",
+      "answered": true,
+      "top_similarity": 0.5196,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['multiples of 100']"
+      ]
+    },
+    {
+      "case_id": "T08",
+      "topic": "payment-failure/retry policy",
+      "kind": "in_scope",
+      "query": "My payment failed but money was deducted. What happens now?",
+      "answered": true,
+      "top_similarity": 0.5998,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['5 to 7 working days']"
+      ]
+    },
+    {
+      "case_id": "T09",
+      "topic": "size-exchange policy",
+      "kind": "in_scope",
+      "query": "Can I exchange a t-shirt for a bigger size?",
+      "answered": true,
+      "top_similarity": 0.5127,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['7 days of delivery']"
+      ]
+    },
+    {
+      "case_id": "T10",
+      "topic": "damaged-item claim process",
+      "kind": "in_scope",
+      "query": "My order arrived damaged. What should I do?",
+      "answered": true,
+      "top_similarity": 0.6437,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['48 hours']"
+      ]
+    },
+    {
+      "case_id": "T11",
+      "topic": "international shipping restrictions",
+      "kind": "in_scope",
+      "query": "Do you deliver to Dubai?",
+      "answered": true,
+      "top_similarity": 0.3699,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['India only']"
+      ]
+    },
+    {
+      "case_id": "T12",
+      "topic": "customer-support escalation matrix",
+      "kind": "in_scope",
+      "query": "When does my complaint get escalated to a human agent?",
+      "answered": true,
+      "top_similarity": 0.4265,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['Tier 2']"
+      ]
+    },
+    {
+      "case_id": "T13",
+      "topic": "order record lookup",
+      "kind": "order",
+      "query": "What is the current status of my order ORD-0037?",
+      "answered": true,
+      "top_similarity": 0.3611,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "grounding: coverage 1.00, all sentences supported",
+        "facts present: ['ORD-0037']",
+        "order lookup: tool_invoked=True, record id present=True"
+      ]
+    },
+    {
+      "case_id": "T14",
+      "topic": "out-of-scope: technical support outside the KB",
+      "kind": "out_of_scope",
+      "query": "How do I install the latest NVIDIA CUDA driver on Ubuntu?",
+      "answered": false,
+      "top_similarity": 0.0672,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "refusal makes no factual claim, so grounding is 1.0 by rule",
+        "expected refusal: refused correctly",
+        "out-of-scope: correct iff refused"
+      ]
+    },
+    {
+      "case_id": "T15",
+      "topic": "out-of-scope: general knowledge",
+      "kind": "out_of_scope",
+      "query": "Who won the 2019 Cricket World Cup final?",
+      "answered": false,
+      "top_similarity": 0.126,
+      "accuracy": 1.0,
+      "grounding": 1.0,
+      "completeness": 1.0,
+      "safety": 1.0,
+      "mean": 1.0,
+      "notes": [
+        "refusal makes no factual claim, so grounding is 1.0 by rule",
+        "expected refusal: refused correctly",
+        "out-of-scope: correct iff refused"
+      ]
+    }
+  ],
+  "averages": {
+    "accuracy": 1.0,
+    "grounding": 1.0,
+    "completeness": 1.0,
+    "safety": 1.0,
+    "mean": 1.0
+  }
+}

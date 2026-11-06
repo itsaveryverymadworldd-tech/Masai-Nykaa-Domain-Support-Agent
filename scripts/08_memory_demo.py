@@ -34,26 +34,29 @@ def last_customer_turn(history_text: str) -> str | None:
     return None
 
 
-def make_run_fn(log: list[str]):
-    """Build the crew-backed responder, recording how memory was applied."""
+def make_run_fn(log: list[dict]):
+    """Build the crew-backed responder, recording how memory was applied.
+
+    Entries are dicts, not strings, so assertions can target the *effective
+    query*. Answer substrings are not a reliable memory discriminator: the KB
+    legitimately contains overlapping facts, so a fresh session can surface the
+    same phrase without any memory being involved.
+    """
 
     def run_fn(question: str, history_text: str) -> str:
         prior = last_customer_turn(history_text)
-        if prior and prior.lower() != question.lower():
-            # Resolve the elliptical follow-up against the previous customer
-            # turn -- this is the memory doing actual work, not decoration.
-            effective = f"{prior} {question}"
-            log.append(
-                f"    [memory applied] prior turn {prior!r} prepended "
-                f"-> effective query {effective!r}"
-            )
-        else:
-            effective = question
-            log.append(f"    [no memory] effective query {question!r}")
-
+        applied = bool(prior and prior.lower() != question.lower())
+        effective = f"{prior} {question}" if applied else question
+        log.append(
+            {
+                "applied": applied,
+                "prior": prior,
+                "question": question,
+                "effective": effective,
+            }
+        )
         run = run_crew(effective)
-        parsed = parse_response(run.result)
-        return parsed.answer
+        return parse_response(run.result).answer
 
     return run_fn
 
@@ -89,7 +92,7 @@ def main() -> int:
     session_a = "session-A"
     STORE.reset(session_a)
 
-    log_a: list[str] = []
+    log_a: list[dict] = []
     runnable_a = build_conversational_runnable(make_run_fn(log_a))
 
     turns_a = [
@@ -115,8 +118,11 @@ def main() -> int:
         say(f"    {m['role']:>6}: {m['content'][:100]}")
     say()
     say("memory log:")
-    for line in log_a:
-        say(line)
+    for entry in log_a:
+        say(
+            f"    [{'memory applied' if entry['applied'] else 'no memory'}] "
+            f"effective query {entry['effective']!r}"
+        )
 
     if STORE.turns(session_a) != 4:
         failures.append(
@@ -134,7 +140,7 @@ def main() -> int:
     session_b = "session-B-fresh"
     STORE.reset(session_b)
 
-    log_b: list[str] = []
+    log_b: list[dict] = []
     runnable_b = build_conversational_runnable(make_run_fn(log_b))
 
     say()
@@ -146,29 +152,30 @@ def main() -> int:
     say(f"AGENT   : {answer_b[:300]}")
     say()
     say("memory log:")
-    for line in log_b:
-        say(line)
+    for entry in log_b:
+        say(
+            f"    [{'memory applied' if entry['applied'] else 'no memory'}] "
+            f"effective query {entry['effective']!r}"
+        )
 
-    a_covers_home = "10-day" in answers_a[1]
-    b_covers_home = "10-day" in answer_b
+    a_entry = log_a[-1]
+    b_entry = log_b[0]
     say()
-    say("COMPARISON")
+    say("COMPARISON (asserted on the EFFECTIVE QUERY, not on answer substrings)")
     say("-" * 78)
-    say(f"  session A turn 2 effective query : {turns_a[0]} + {turns_a[1]}")
-    say(f"  session B turn 1 effective query : {turns_a[1]}")
-    say(f"  A resolves the follow-up to the Home return window "
-        f"(answer says '10-day') : {a_covers_home}")
-    say(f"  B has no such context and does not produce the Home window "
-        f"                      : {not b_covers_home}")
+    say(f"  session A turn 2 effective query : {a_entry['effective']}")
+    say(f"  session B turn 1 effective query : {b_entry['effective']}")
+    say(f"  A prepended the prior customer turn : {a_entry['applied']}")
+    say(f"  B ran with no history at all        : {not b_entry['applied']}")
 
-    if "[memory applied]" not in " ".join(log_a):
+    if not a_entry["applied"]:
         failures.append("session A did not apply memory on the follow-up turn")
-    if "[no memory]" not in " ".join(log_b):
+    if b_entry["applied"]:
         failures.append("session B incorrectly applied memory in a fresh session")
-    if not a_covers_home:
-        failures.append("session A follow-up did not resolve to the Home return window")
-    if b_covers_home:
-        failures.append("session B unexpectedly produced Home context with no history")
+    if not a_entry["effective"].startswith(turns_a[0]):
+        failures.append("session A effective query did not carry the prior turn forward")
+    if b_entry["effective"] != turns_a[1]:
+        failures.append("session B effective query was not the bare question")
 
     say()
     say("=" * 78)

@@ -15,7 +15,7 @@ threshold is measured empirically in ``scripts/03_calibrate_threshold.py``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Any, Sequence
 
@@ -156,6 +156,14 @@ FALLBACK_MESSAGE = (
 )
 
 
+def chunks_for_doc(collection, doc_id: str) -> list[tuple[str, str]]:
+    """Every ``(chunk_id, text)`` belonging to ``doc_id``, in stored order."""
+    res = collection.get(where={"doc_id": doc_id}, include=["documents", "metadatas"])
+    pairs = list(zip(res["ids"], res["documents"], res["metadatas"]))
+    pairs.sort(key=lambda p: p[2].get("position", 0))
+    return [(cid, text) for cid, text, _ in pairs]
+
+
 @dataclass
 class GroundedAnswer:
     """Result of grounded generation, including the refusal path."""
@@ -166,6 +174,7 @@ class GroundedAnswer:
     top_similarity: float
     threshold: float
     hits: list[Hit]
+    contexts: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -210,13 +219,27 @@ def grounded_answer(
             hits=hits,
         )
 
-    # Extractive composition: state the governing policy followed by the
-    # supporting sentences actually retrieved. Nothing outside the context.
+    # Extractive composition. Start from the chunks that cleared the threshold,
+    # then apply **document expansion**: if the top match belongs to a document,
+    # that document's other chunks are pulled in too. Without this, a question
+    # whose answer lives in a sibling chunk of the right document is answered
+    # incompletely -- the evaluation set showed exactly that (the correct
+    # document ranked first while the expected fact sat in its 4th-ranked
+    # sibling chunk).
     kept = [h for h in hits if h.similarity >= threshold]
-    body = " ".join(h.text for h in kept)
+    used: list[str] = [h.text for h in kept]
+    used_ids = {h.chunk_id for h in kept}
+
+    for doc_id in dict.fromkeys(h.doc_id for h in kept):
+        for cid, text in chunks_for_doc(collection, doc_id):
+            if cid in used_ids:
+                continue
+            used.append(text)
+            used_ids.add(cid)
+
     titles = sorted({h.doc_title for h in kept})
     answer = (
-        f"{body}\n\n(Answered from: {', '.join(titles)}. "
+        f"{' '.join(used)}\n\n(Answered from: {', '.join(titles)}. "
         f"Top match similarity {top:.3f} >= threshold {threshold:.3f}.)"
     )
     return GroundedAnswer(
@@ -226,4 +249,5 @@ def grounded_answer(
         top_similarity=top,
         threshold=threshold,
         hits=hits,
+        contexts=used,
     )

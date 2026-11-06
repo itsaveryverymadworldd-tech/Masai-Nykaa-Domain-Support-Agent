@@ -121,10 +121,10 @@ def main() -> int:
     collection = built["sentence"]
 
     query = "How long do I have to return a pair of shoes?"
-    hits = retrieve(query, collection, top_k=3)
-    contexts = [h.text for h in hits]
-
     good = grounded_answer(query, collection)
+    # Judge against the context the generator actually used, which includes
+    # document expansion of the top document's sibling chunks.
+    contexts = good.contexts
     say()
     say(f"QUERY        : {query}")
     say(f"top-1 sim    : {good.top_similarity:.4f} vs threshold {good.threshold:.4f}")

@@ -1,0 +1,126 @@
+==============================================================================
+TASKS 11 & 12 -- FASTAPI DEPLOYMENT + STRUCTURED JSON-LINES LOGGING
+==============================================================================
+ASGI app        : Nykaa Domain Support Agent
+log destination : data/requests.jsonl
+
+declared routes:
+    POST         /ask
+    POST         /add-document
+    GET          /health
+    WS           /ws/chat
+
+##############################################################################
+# POST /ask -- grounded policy answer
+##############################################################################
+HTTP 200
+{
+  "trace_id": "7fc7b384ef734543",
+  "allowed": true,
+  "reject_reason": null,
+  "response": {
+    "answer": "Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date the order was placed. Apparel, Footwear and Beauty items may be returned within 7 days of delivery. The first size exchange on any order is free of charge; any subsequent exchange within the same order carries a delivery fee that is deduct
+
+##############################################################################
+# POST /ask -- order query (drives check_order_status)
+##############################################################################
+HTTP 200
+  needs_human      = True
+  escalation_score = 0.697964
+  order_status     = Shipped
+
+##############################################################################
+# POST /ask -- input guardrail rejection (prompt injection)
+##############################################################################
+HTTP 200
+{
+  "trace_id": "40665c01a77e415d",
+  "allowed": false,
+  "reject_reason": "input matched the 'instruction_override' injection rule",
+  "response": null,
+  "duration_ms": 0.249
+}
+
+##############################################################################
+# POST /ask -- with fixed-format PII in the query
+##############################################################################
+RAW REQUEST SENT: My number is 9876543210 and the card ending in 4321 was charged twice.
+HTTP 200
+  answer: Orders cancelled before dispatch are refunded in full within 3 working days. If the cancelled order had already been billed to a credit card...
+
+##############################################################################
+# POST /add-document
+##############################################################################
+collections before : {'kb_fixed_overlap': 24, 'kb_sentence': 30}
+HTTP 200
+{
+  "trace_id": "ebb94145177b4a71",
+  "doc_id": "99_gift_wrapping",
+  "ok": true,
+  "message": "document added and both collections re-indexed",
+  "collection_counts": {
+    "kb_fixed_overlap": 25,
+    "kb_sentence": 32
+  },
+  "duration_ms": 938.131
+}
+collections after  : {'kb_fixed_overlap': 25, 'kb_sentence': 32}
+both collections re-indexed and grew: True
+restored after test : 24 / 30 chunks
+
+GET /health -> HTTP 200: {"status": "ok", "mock_llm": true, "collections": ["kb_fixed_overlap", "kb_sentence"], "similarity_threshold": 0.3182, "escalation_threshold": 0.3577}
+
+##############################################################################
+# WS /ws/chat -- multi-turn, then a client DISCONNECT mid-conversation
+##############################################################################
+-- client 1: two turns, then disconnects WITHOUT saying goodbye --
+  turn 1: How long do I have to return a pair of shoes?
+    -> trace a7b78612c2884bc6, answered=True, 125.945 ms
+    -> Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replaceme...
+  turn 2: And what about Home products?
+    -> trace a47162ce83534716, answered=True, 135.545 ms
+    -> Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may onl...
+  [client 1 closing the socket mid-conversation now]
+
+-- client 2: connects AFTER that disconnect --
+  server still serving: trace 8c07bd6bdb1f42cb, answered=True, 126.172 ms
+  -> Warranty is a separate entitlement from the return window and does not extend it. Electronics carry the manufa...
+  graceful close: {'type': 'closing', 'session_id': 'ws-demo-2'}
+
+##############################################################################
+# STRUCTURED LOG VERIFICATION
+##############################################################################
+log entries written : 9
+one line per request: True
+
+entries with a trace_id : 9/9
+entries with timing     : 9/9
+
+every line, in order (timestamp | trace | endpoint | status | ms):
+  18:57:34.116 | 7fc7b384ef734543 | /ask           | ok                  |   2448.12
+  18:57:34.224 | 53978502bb854729 | /ask           | ok                  |    103.86
+  18:57:34.226 | 40665c01a77e415d | /ask           | rejected_guardrail  |      0.03
+  18:57:34.334 | b574cebc533c4775 | /ask           | ok                  |    104.42
+  18:57:36.164 | ebb94145177b4a71 | /add-document  | ok                  |    937.83
+  18:57:37.217 | a7b78612c2884bc6 | /ws/chat       | ok                  |    125.70
+  18:57:37.353 | a47162ce83534716 | /ws/chat       | ok                  |    135.38
+  18:57:37.354 | 340fb835f54648d1 | /ws/chat       | disconnect          |      0.00
+  18:57:37.483 | 8c07bd6bdb1f42cb | /ws/chat       | ok                  |    126.02
+
+PII CHECK -- scanning for any unmasked value:
+  whole-file search (phone forms)  : NONE
+  request_text search (card last4) : NONE
+  [OK] no raw fixed-format PII value reached disk
+
+the masked form IS present, proving masking ran rather than being skipped:
+  b574cebc533c4775  My number is [PHONE_REDACTED] and the card [CARD_LAST4_REDACTED] was charged twice.
+                redactions: ['phone:98****10', 'card_last4:** 1']
+
+==============================================================================
+RESULT: PASS
+  2 HTTP endpoints + health + 1 WebSocket endpoint all working.
+  WebSocket survived a mid-conversation disconnect and kept serving.
+  9 requests each produced ONE JSON-Lines entry with a
+  trace id and timing.
+  No raw fixed-format PII value reached the log.
+==============================================================================

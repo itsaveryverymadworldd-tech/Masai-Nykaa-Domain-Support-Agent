@@ -1,0 +1,212 @@
+==============================================================================
+TASK 13 -- LLM-AS-JUDGE EVALUATION (MOCK_LLM), 15 QUERIES
+==============================================================================
+evaluation set  : 15 queries
+  in-scope      : 12
+  order lookup  : 1
+  out-of-scope  : 2
+judge           : deterministic rubric evaluator under MOCK_LLM
+
+required KB topics covered : 12/12
+  [OK] every required knowledge-base topic has at least one query
+
+##############################################################################
+# PER-QUERY RESULTS
+##############################################################################
+
+T01  [in_scope]  return window by product category
+    query         : How long do I have to return a pair of shoes?
+    answered      : True   top-1 similarity: 0.5211
+    retrieved     : ['09_size_exchange', '01_return_window']
+    expected facts: ['7 days of delivery'] -> present ['7 days of delivery']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['7 days of delivery']
+
+T02  [in_scope]  COD refund timelines
+    query         : When will I get my money back for a cash on delivery order?
+    answered      : True   top-1 similarity: 0.7559
+    retrieved     : ['02_cod_refund_timelines', '06_order_cancellation', '01_return_window']
+    expected facts: ['3 to 5 working days'] -> present ['3 to 5 working days']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['3 to 5 working days']
+
+T03  [in_scope]  delivery SLAs
+    query         : How many days does standard delivery take to a metro pin code?
+    answered      : True   top-1 similarity: 0.8748
+    retrieved     : ['03_delivery_slas', '06_order_cancellation']
+    expected facts: ['3 to 5 working days'] -> present ['3 to 5 working days']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['3 to 5 working days']
+
+T04  [in_scope]  reverse-pickup eligibility
+    query         : Can a return be picked up from my home address?
+    answered      : True   top-1 similarity: 0.5563
+    retrieved     : ['04_reverse_pickup_eligibility', '01_return_window']
+    expected facts: ['19,000 pin codes'] -> present ['19,000 pin codes']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['19,000 pin codes']
+
+T05  [in_scope]  warranty terms by category
+    query         : What is the warranty on a laptop I bought?
+    answered      : True   top-1 similarity: 0.5757
+    retrieved     : ['05_warranty_terms', '10_damaged_item_claims']
+    expected facts: ['12 months'] -> present ['12 months']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['12 months']
+
+T06  [in_scope]  order-cancellation policy
+    query         : Can I cancel an order that has already been shipped?
+    answered      : True   top-1 similarity: 0.7153
+    retrieved     : ['06_order_cancellation', '02_cod_refund_timelines']
+    expected facts: ['no longer possible'] -> present ['no longer possible']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['no longer possible']
+
+T07  [in_scope]  loyalty-points redemption policy
+    query         : How many loyalty points do I need to redeem for a discount?
+    answered      : True   top-1 similarity: 0.5196
+    retrieved     : ['07_loyalty_points']
+    expected facts: ['multiples of 100'] -> present ['multiples of 100']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['multiples of 100']
+
+T08  [in_scope]  payment-failure/retry policy
+    query         : My payment failed but money was deducted. What happens now?
+    answered      : True   top-1 similarity: 0.5998
+    retrieved     : ['08_payment_failure_retry', '06_order_cancellation']
+    expected facts: ['5 to 7 working days'] -> present ['5 to 7 working days']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['5 to 7 working days']
+
+T09  [in_scope]  size-exchange policy
+    query         : Can I exchange a t-shirt for a bigger size?
+    answered      : True   top-1 similarity: 0.5127
+    retrieved     : ['09_size_exchange']
+    expected facts: ['7 days of delivery'] -> present ['7 days of delivery']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['7 days of delivery']
+
+T10  [in_scope]  damaged-item claim process
+    query         : My order arrived damaged. What should I do?
+    answered      : True   top-1 similarity: 0.6437
+    retrieved     : ['10_damaged_item_claims', '05_warranty_terms', '08_payment_failure_retry']
+    expected facts: ['48 hours'] -> present ['48 hours']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['48 hours']
+
+T11  [in_scope]  international shipping restrictions
+    query         : Do you deliver to Dubai?
+    answered      : True   top-1 similarity: 0.3699
+    retrieved     : ['03_delivery_slas', '11_international_shipping']
+    expected facts: ['India only'] -> present ['India only']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['India only']
+
+T12  [in_scope]  customer-support escalation matrix
+    query         : When does my complaint get escalated to a human agent?
+    answered      : True   top-1 similarity: 0.4265
+    retrieved     : ['12_escalation_matrix', '10_damaged_item_claims']
+    expected facts: ['Tier 2'] -> present ['Tier 2']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['Tier 2']
+
+T13  [order]  order record lookup
+    query         : What is the current status of my order ORD-0037?
+    answered      : True   top-1 similarity: 0.3611
+    retrieved     : ['05_warranty_terms', '06_order_cancellation', '10_damaged_item_claims']
+    expected facts: ['ORD-0037'] -> present []
+    tools invoked : ['rag_lookup', 'check_order_status']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - grounding: coverage 1.00, all sentences supported
+      - facts present: ['ORD-0037']
+      - order lookup: tool_invoked=True, record id present=True
+
+T14  [out_of_scope]  out-of-scope: technical support outside the KB
+    query         : How do I install the latest NVIDIA CUDA driver on Ubuntu?
+    answered      : False   top-1 similarity: 0.0672
+    retrieved     : ['08_payment_failure_retry', '12_escalation_matrix', '11_international_shipping']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - refusal makes no factual claim, so grounding is 1.0 by rule
+      - expected refusal: refused correctly
+      - out-of-scope: correct iff refused
+
+T15  [out_of_scope]  out-of-scope: general knowledge
+    query         : Who won the 2019 Cricket World Cup final?
+    answered      : False   top-1 similarity: 0.1260
+    retrieved     : ['07_loyalty_points', '04_reverse_pickup_eligibility', '11_international_shipping']
+    tools invoked : ['rag_lookup']
+    SCORES  accuracy=1.00  grounding=1.00  completeness=1.00  safety=1.00   (mean 1.000)
+      - refusal makes no factual claim, so grounding is 1.0 by rule
+      - expected refusal: refused correctly
+      - out-of-scope: correct iff refused
+
+==============================================================================
+SUMMARY TABLE -- all four scores per query
+==============================================================================
+case  kind            accuracy  grounding  complete   safety    mean
+------------------------------------------------------------------------------
+T01   in_scope            1.00       1.00      1.00     1.00   1.000
+T02   in_scope            1.00       1.00      1.00     1.00   1.000
+T03   in_scope            1.00       1.00      1.00     1.00   1.000
+T04   in_scope            1.00       1.00      1.00     1.00   1.000
+T05   in_scope            1.00       1.00      1.00     1.00   1.000
+T06   in_scope            1.00       1.00      1.00     1.00   1.000
+T07   in_scope            1.00       1.00      1.00     1.00   1.000
+T08   in_scope            1.00       1.00      1.00     1.00   1.000
+T09   in_scope            1.00       1.00      1.00     1.00   1.000
+T10   in_scope            1.00       1.00      1.00     1.00   1.000
+T11   in_scope            1.00       1.00      1.00     1.00   1.000
+T12   in_scope            1.00       1.00      1.00     1.00   1.000
+T13   order               1.00       1.00      1.00     1.00   1.000
+T14   out_of_scope        1.00       1.00      1.00     1.00   1.000
+T15   out_of_scope        1.00       1.00      1.00     1.00   1.000
+------------------------------------------------------------------------------
+AVERAGE                 1.0000     1.0000    1.0000   1.0000  1.0000
+
+four averages across all 15 queries:
+  Accuracy     1.0000
+  Grounding    1.0000
+  Completeness 1.0000
+  Safety       1.0000
+
+the judge prompt that would be sent to a real LLM (first case, truncated):
+    You are an impartial evaluator for a customer-support RAG agent. Given the
+    user's question, the agent's answer, the documents it retrieved, and the
+    expected facts the answer should contain, score the answer on four properties,
+    each a number between 0 and 1.
+    
+    Accuracy:      Is the answer factually correct for the question?
+                   A correct refusal is accurate. A confident wrong answer is not.
+    Grounding:     Is every claim in the answer supported by the retrieved context?
+    ...
+
+==============================================================================
+RESULT: PASS
+  15/15 queries scored on all four properties.
+  Averages: accuracy 1.0000, grounding 1.0000, completeness 1.0000, safety 1.0000
+==============================================================================
