@@ -1,0 +1,59 @@
+==============================================================================
+TASK 16 -- RESPONSE CACHING (in-memory, keyed by normalised query)
+==============================================================================
+cache key  : normalised query text
+normalising: 'how long do i have to return a pair of shoes'
+scope      : in-process only
+
+##############################################################################
+# BEFORE / AFTER -- the SAME query issued twice
+##############################################################################
+
+call 1 (cache MISS expected)
+    underlying generator calls so far : 1
+    elapsed                           : 19.87 ms
+    top_similarity                    : 0.5211
+
+call 2 (cache HIT expected)
+    underlying generator calls so far : 1
+    elapsed                           : 0.02 ms
+    top_similarity                    : 0.5211
+
+EVIDENCE:
+    underlying generator call count : 1  (must be 1, not 2)
+    cache hits                      : 1
+    cache misses                    : 1
+    hit rate                        : 0.5000
+    identical result object returned: True
+    speedup on the hit              : 1184.1x (19.87 ms -> 0.02 ms)
+
+##############################################################################
+# NORMALISATION -- a trivially different phrasing still hits
+##############################################################################
+variant query : '  HOW long do I have to return a pair of shoes???  '
+normalised    : 'how long do i have to return a pair of shoes'
+same key as original: True
+underlying calls after the variant : 1 (was 1)
+    [OK] normalisation produced a hit; no redundant generation
+
+##############################################################################
+# A DIFFERENT query must NOT hit
+##############################################################################
+query         : What is the warranty on a laptop I bought?
+underlying calls after it : 2 (was 1)
+    [OK] cache miss, generator ran
+
+FINAL CACHE REPORT
+    underlying_calls     2
+    hits                 2
+    misses               2
+    lookups              4
+    hit_rate             0.5
+    entries              2
+
+==============================================================================
+RESULT: PASS
+  A repeated identical query produced a real cache hit, avoiding a
+  redundant grounded-generation call: 2 hits across 4 lookups left the underlying generator at
+  only 2 call(s), with a 1184.1x speedup on the hit.
+==============================================================================

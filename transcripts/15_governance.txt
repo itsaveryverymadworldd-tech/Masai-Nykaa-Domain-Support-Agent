@@ -1,0 +1,91 @@
+==============================================================================
+TASK 15 -- FOUR-LAYER AI GOVERNANCE
+==============================================================================
+
+##############################################################################
+# APPLICATION LAYER -- LEAST AUTONOMY
+##############################################################################
+privileged tool ownership table:
+    check_order_status     -> owned by 'Order Lookup Specialist'
+
+actual wiring in the built crew:
+    agents                            : 3
+    holders of check_order_status     : ['Order Lookup Specialist']
+    exactly one holder                : True
+
+enforcement is a GUARD, not a comment -- attempting a bad wiring:
+    [OK]   Order Lookup Specialist -> check_order_status : allowed
+    [OK]   Policy Retrieval Specialist -> check_order_status : BLOCKED
+           least-autonomy violation: 'check_order_status' is owned by 'Order Lookup Specialist' and must not be wired to 'Policy Retrieval Specialist'
+    [OK]   Response Composer -> check_order_status : BLOCKED
+           least-autonomy violation: 'check_order_status' is owned by 'Order Lookup Specialist' and must not be wired to 'Response Composer'
+
+validating every tool on every agent in the real crew:
+    [OK] Policy Retrieval Specialist    tools=['rag_lookup']
+    [OK] Order Lookup Specialist        tools=['check_order_status']
+    [OK] Response Composer              tools=[]
+
+one-paragraph explanation of the guard:
+  Only the Lookup Agent may call check_order_status. This is enforced in
+  two independent places rather than by convention: the crew builder
+  constructs the tool once and attaches it to the Lookup Agent alone, and
+  enforce_tool_ownership() re-checks every agent's tool list before the
+  crew is built, raising LeastAutonomyViolation if a privileged tool is
+  ever wired to a non-owner. The second check is what makes this a guard
+  rather than a comment: a future edit that adds the tool to the Composer
+  for convenience would fail loudly at construction time instead of
+  silently widening the blast radius. The Retrieval and Composer agents
+  are therefore structurally incapable of reading order records, so a
+  prompt-injection attempt aimed at the retrieval path cannot reach them.
+
+##############################################################################
+# APPLICATION LAYER -- RISK CLASSIFICATION
+##############################################################################
+    Low     summarisation, transcription
+    Medium  code generation, customer support tickets <== THIS SYSTEM
+    High    medical data, hiring decisions, financial data
+
+CLASSIFICATION: Medium
+
+justification:
+  This system is classified **Medium** risk.
+  It handles customer support tickets: it answers policy questions and reports the status of one order at a time, which is squarely the 'customer support tickets' example the brief places at Medium.
+  It is not Low risk, because the answers drive real customer expectations about refunds, returns and delivery windows -- a confidently wrong answer has a direct commercial cost, which is why the output-side groundedness guard exists.
+  It is not High risk, because it handles no medical data, makes no hiring decisions, and touches no financial data beyond the value already printed on the customer's own order: it never sees a full card number (only the last four, masked on input), never initiates a payment, and cannot change an order's state.
+  The Medium classification is what justifies the operational controls actually implemented here: an independent second-agent review stage before any answer is released, least-autonomy tool wiring, and a hard per-request budget cap.
+
+##############################################################################
+# RUNTIME LAYER -- PER-REQUEST TOKEN / COST BUDGET
+##############################################################################
+budget per request : 4096 tokens
+max query length   : 2000 characters
+
+CASE 1 -- a normal in-budget request
+    query chars      : 45
+    estimated tokens : 912 / 4096
+    allowed          : True
+    reason           : within budget
+
+CASE 2 -- a DELIBERATELY OVERSIZED request (must be REJECTED)
+    query chars      : 5520
+    estimated tokens : 2281 / 4096
+    allowed          : False
+    reason           : query is 5520 characters, over the 2000-character limit
+    [OK] rejected rather than silently truncated or sent anyway
+
+CASE 3 -- normal query, but an OVERSIZED RETRIEVED CONTEXT
+          (the realistic way the token budget binds: the query is short,
+           the assembled prompt is not)
+    query chars      : 45 (limit 2000, so within the char cap)
+    context chars    : 22800
+    estimated tokens : 6611 / 4096
+    allowed          : False
+    reason           : estimated 6611 tokens exceeds the 4096-token per-request budget
+    [OK] rejected on the TOKEN budget, independently of the char cap
+
+==============================================================================
+RESULT: PASS
+  Application layer: least autonomy enforced (bad wirings blocked),
+  risk classified Medium with justification.
+  Runtime layer: the oversized request was rejected, not truncated.
+==============================================================================

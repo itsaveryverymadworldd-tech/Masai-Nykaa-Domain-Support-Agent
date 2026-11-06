@@ -55,6 +55,10 @@ CARD_LAST4_RES: tuple[re.Pattern[str], ...] = (
 MASKED_PHONE = "[PHONE_REDACTED]"
 MASKED_CARD = "[CARD_LAST4_REDACTED]"
 
+#: The provenance footer the generator appends. Matched only when it is at the
+#: very end of the text, so trailing content is still subject to the check.
+_FOOTER_RE = re.compile(r"\n*\(Answered from:.*?\)\s*\Z", re.DOTALL)
+
 #: Free-text fields the brief places out of scope. Recorded, not implemented.
 OUT_OF_SCOPE_PII = ("customer_name", "delivery_address")
 
@@ -192,7 +196,13 @@ def check_groundedness(
     # Strip the generator's provenance footer before scoring. It is metadata
     # about the retrieval, not a claim about policy, so scoring it would flag
     # every legitimate answer as ungrounded.
-    answer = re.split(r"\(Answered from:", answer)[0].strip()
+    #
+    # NOTE: this matches the footer ONLY when it sits at the end of the text.
+    # A naive `split("(Answered from:")[0]` would discard *everything* after the
+    # marker, which silently exempts any trailing content from the groundedness
+    # check -- a real hole, since injected text appended after the footer would
+    # pass unexamined.
+    answer = _FOOTER_RE.sub("", answer).strip()
 
     context_tokens = _content_tokens(" ".join(contexts))
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", answer) if s.strip()]

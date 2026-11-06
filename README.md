@@ -355,6 +355,115 @@ because it measures retrieval *ranking*, which is unchanged.
 
 ---
 
+## Part 4 — Resilience & Governance
+
+### Task 14 — Autogen review stage
+
+A 2-agent `RoundRobinGroupChat` (`Policy_Compliance_Reviewer` → `Final_Editor`)
+that takes the composer's draft **plus the original retrieved context** and
+either approves it unchanged or revises it.
+
+* bound with **`max_turns=2`** (the real parameter — not `max_iterations`)
+* `output_content_type=VerdictModel` on the Final-Editor
+* **and** `custom_message_types=[StructuredMessage[VerdictModel]]` on the team —
+  omitting the second raises `ValueError: Message type ... is not registered`
+* verdict fields: `approved: bool`, `final_answer: str`, `reason: str`
+
+| Case | Input | Outcome |
+| --- | --- | --- |
+| A | a grounded draft | **approved = True**, `final_answer` byte-identical to the draft |
+| B | same draft + a fabricated "lifetime 365-day return" claim | **approved = False**, claim removed from `final_answer`, reason given |
+
+Transcript: `transcripts/14_autogen_review.txt`. Both agents speak in both cases.
+
+### Task 15 — four-layer governance
+
+**Application layer — least autonomy, enforced.** Only the Lookup Agent may call
+`check_order_status`. This is enforced in *two* places, not by convention: the
+crew builder attaches the tool to that agent alone, and
+`enforce_tool_ownership()` re-validates every agent's tool list before the crew
+is built, raising `LeastAutonomyViolation`. The transcript shows the permitted
+wiring passing and both other agents being **blocked**.
+
+**Application layer — risk classification: `Medium`.** This handles customer
+support tickets, which the brief places at Medium. Not Low, because wrong
+answers drive real customer expectations about refunds and delivery windows. Not
+High, because it handles no medical or hiring data and no financial data beyond
+the value printed on the customer's own order — it never sees a full card number
+(only the masked last four), never initiates a payment, and cannot change an
+order's state. Full justification in `src/nykaa/governance.py` and the Task 15
+transcript.
+
+**Runtime layer — budget cap.** Two rejections demonstrated, both refused rather
+than silently truncated:
+* an oversized query → rejected on the character cap
+* a normal query with an oversized retrieved context → rejected on the
+  **token** budget (6,611 > 4,096), independently of the character cap
+
+### Task 16 — response caching
+
+In-memory, keyed by **normalised** query text (lower-case, punctuation stripped,
+whitespace collapsed). Evidence from `transcripts/16_caching.txt`:
+
+```
+underlying generator call count : 1   (must be 1, not 2)
+cache hits : 1     misses : 1
+speedup on the hit : 1473.3x (18.74 ms -> 0.01 ms)
+```
+
+A differently-punctuated variant (`"  HOW long do I have to return a pair of shoes???  "`)
+also hits, confirming normalisation works; a genuinely different query misses.
+
+### Autogen 1.x gotcha
+
+**Agent names must be valid Python identifiers.** The brief's own example names
+are hyphenated (`Policy-Compliance-Reviewer`), which autogen-agentchat 0.7.5
+rejects with `ValueError: The agent name must be a valid Python identifier`. The
+hyphenated form is kept as the agent's `description` instead.
+
+---
+
+## Acceptance criteria — verified
+
+`scripts/99_acceptance_check.py` walks every acceptance criterion in the brief and
+prints a PASS/FAIL verdict per criterion against real code or a real artifact:
+
+```
+TOTAL CHECKS: 29    PASSED: 29    FAILED: 0
+ALL ACCEPTANCE CRITERIA SATISFIED.
+```
+
+---
+
+## Reproducing everything
+
+```bash
+uv sync                                              # exact locked environment
+uv run python scripts/00_verify_env.py               # stack, CPU-only, telemetry off
+uv run python scripts/01_fetch_model.py              # one-time model fetch (network)
+uv run python dataset.py                             # Task 1 report
+uv run python scripts/02_build_index.py              # Task 3
+uv run python scripts/03_calibrate_threshold.py      # Task 4 threshold
+uv run python scripts/04_demo_grounded.py            # Task 4
+uv run python scripts/05_eval_chunking.py            # Task 5
+uv run python scripts/06_escalation_score.py         # Task 6
+uv run python scripts/07_crew_demo.py                # Task 7
+uv run python scripts/08_memory_demo.py              # Task 8
+uv run python scripts/09_schema_demo.py              # Task 9
+uv run python scripts/10_guardrails_demo.py          # Task 10
+uv run python scripts/11_api_demo.py                 # Tasks 11 & 12
+uv run python scripts/13_eval_judge.py               # Task 13
+uv run python scripts/14_autogen_review.py           # Task 14
+uv run python scripts/15_governance.py               # Task 15
+uv run python scripts/16_caching.py                  # Task 16
+uv run python scripts/99_acceptance_check.py         # all acceptance criteria
+```
+
+Every script is self-checking: it prints `RESULT: PASS` or `RESULT: FAIL` and
+exits non-zero on failure. All transcripts are committed under `transcripts/`.
+
+---
+
 ## Repository layout
 
 ```

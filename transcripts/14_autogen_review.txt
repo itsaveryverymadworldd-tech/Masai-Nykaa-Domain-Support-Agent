@@ -1,0 +1,64 @@
+==============================================================================
+TASK 14 -- AUTOGEN ROUND ROBIN REVIEW STAGE
+==============================================================================
+team            : RoundRobinGroupChat
+agents          : Policy-Compliance-Reviewer, Final-Editor
+binding         : max_turns=2  (NOT max_iterations)
+                  (MaxMessageTermination would need (3), because the
+                   initiating task message counts as message 1)
+custom_message_types=[StructuredMessage[VerdictModel]]  <-- required,
+                  omitting it raises 'Message type ... is not registered'
+structured out  : output_content_type=VerdictModel on Final-Editor
+verdict fields  : approved: bool, final_answer: str, reason: str
+
+query           : How long do I have to return a pair of shoes?
+retrieved docs  : ['09_size_exchange', '01_return_window', '01_return_window']
+context chunks  : 6
+
+##############################################################################
+# CASE A -- grounded draft  (expect: approved UNCHANGED)
+##############################################################################
+client calls    : 2
+round-robin transcript:
+    [user]  Review the following draft answer against the retrieved context.
+Approve it unchanged if every claim is supported; otherwise revise it.
+
+REVIEW_PAYLOA
+    [Policy_Compliance_Reviewer]  COMPLIANCE OK: every claim in the draft is supported by the retrieved context. Recommend approval without changes.
+    [Final_Editor]  {"approved":true,"final_answer":"Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size
+
+VERDICT approved     : True
+VERDICT reason       : Every sentence is supported by the retrieved context (token coverage 1.00); approved unchanged.
+final_answer unchanged: True
+
+##############################################################################
+# CASE B -- draft with a DELIBERATELY INJECTED ungrounded claim
+##############################################################################
+injected claim  : Nykaa also offers a lifetime return window of 365 days on all Electronics purchased through the mobile app, and a full cash refund at any store.
+client calls    : 2
+round-robin transcript:
+    [user]  Review the following draft answer against the retrieved context.
+Approve it unchanged if every claim is supported; otherwise revise it.
+
+REVIEW_PAYLOAD: {"draft": "Size exchanges a
+    [Policy_Compliance_Reviewer]  COMPLIANCE ISSUE: 1 sentence(s) are not supported by the retrieved context. Recommend the Final-Editor remove them. Unsupported: ['Nykaa also offers a lifetime return window of 365
+    [Final_Editor]  {"approved":false,"final_answer":"Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the origi
+
+VERDICT approved      : False
+VERDICT reason        : Revised: removed 1 sentence(s) not supported by the retrieved context (coverage 0.95).
+injected claim still present in final_answer: False
+final_answer (first 300 chars): Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be return
+
+##############################################################################
+# STRUCTURED VERDICT VALIDATION (both cases)
+##############################################################################
+  case A: [OK] VerdictModel round-trips (approved=True, final_answer=1337 chars, reason=95 chars)
+  case B: [OK] VerdictModel round-trips (approved=False, final_answer=1336 chars, reason=86 chars)
+
+==============================================================================
+RESULT: PASS
+  Case A: grounded draft approved UNCHANGED.
+  Case B: ungrounded draft REVISED, injected claim removed.
+  Both agents spoke in both cases (max_turns=2).
+  Both verdicts are valid Pydantic VerdictModel instances.
+==============================================================================
