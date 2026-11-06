@@ -176,6 +176,114 @@ leaving a wider margin around the refusal threshold. **Collection B
 
 ---
 
+## Part 2 — CrewAI crew, memory, structured output, guardrails
+
+### Task 6 — `check_order_status` and the designed escalation score
+
+```
+escalation_score = status_urgency * (0.40*delayed + 0.30*recency + 0.30*value)
+
+  delayed    1.0 if delayed_shipment else 0.0
+  recency    days_since_created / 30          (normalised recency signal)
+  value      min(1.0, order_value_inr / 25000) (saturates at the top price band)
+  status_urgency: Placed 1.00 | Shipped 1.00 | Returned 0.85 | Delivered 0.55 | Refunded 0.35
+```
+
+A weighted blend of three continuous components — **not a bare boolean OR**: two
+delayed orders still score differently depending on how stale and how valuable
+they are.
+
+**Threshold: `0.3577`, the 80th percentile of `escalation_score` over the
+generated dataset** — not a round number. It selects **10/48 orders (20.8%)**,
+whose `days_since_created` has median 13 (IQR 8–22): the stalest ~20% of orders.
+Delayed orders average **+0.4188** higher than non-delayed ones (0.5472 vs
+0.1284). Transcript: `transcripts/06_escalation_score.txt`.
+
+Unknown record ids return an `{"error": "record_not_found"}` dict rather than
+raising, so an agent cannot crash the crew by inventing an id.
+
+### Task 7 — the crew, with both tools demonstrably invoked
+
+| Agent | Tools | Role |
+| --- | --- | --- |
+| Policy Retrieval Specialist | `rag_lookup` | answers policy questions from the KB |
+| Order Lookup Specialist | `check_order_status` | **the only** holder of the lookup tool |
+| Response Composer | *(none)* | merges both into one `SupportResponse` |
+
+Run via `crew.kickoff()`, sequential process. Transcript `transcripts/07_crew_demo.txt`:
+
+* policy-only query → `rag_lookup` invoked, `check_order_status` **not** invoked
+* order query → `rag_lookup` **and** `check_order_status` invoked
+* every response validated against the schema
+
+**Tool dispatch is by declared argument schema, never by tool name.** The
+transcript prints `dispatched_by = declared_schema` and the schema's required
+keys for each call — so a tool named `rag_lookup` can never be misrouted by a
+substring test for `"lookup"`.
+
+### Task 8 — session memory
+
+LangChain's `InMemoryChatMessageHistory` + `RunnableWithMessageHistory`, exactly
+as the brief prescribes. Two transcripts in `transcripts/08_memory_demo.txt`:
+
+* **Transcript A** (`session-A`): turn 1 *"How long do I have to return a pair
+  of shoes?"*, turn 2 *"And what about Home products?"* — memory resolves the
+  elliptical follow-up, and the answer correctly gives Home's **10-day** window.
+  4 messages stored.
+* **Transcript B** (`session-B-fresh`): the same second question in a **fresh**
+  session. State is correctly absent — no prior turn, no Home window.
+
+The `LangChainDeprecationWarning` about LangGraph persistence is observed and
+**left unsilenced**, as the brief states it is expected and harmless.
+
+### Task 9 — structured output, validated in code
+
+`SupportResponse` (Pydantic) in `src/nykaa/schemas.py`. Live crew responses are
+parsed and validated; malformed payloads are **rejected**, because a schema that
+never rejects anything proves nothing. Transcript `transcripts/09_schema_demo.txt`:
+**3/3 live responses validated, 5/5 malformed payloads rejected** (empty answer,
+missing required field, out-of-range `escalation_score`, out-of-range
+`top_similarity`, wrong type for `grounded`).
+
+### Task 10 — guardrails, each demonstrated firing
+
+Transcript `transcripts/10_guardrails_demo.txt`:
+
+| Guardrail | Test case | Result |
+| --- | --- | --- |
+| PII — phone | `9876543210`, `+91 91234 56789`, `09876543210` | all masked |
+| PII — card last-4 | `ending in 4321`, `last 4 digits are 8765`, `XXXX-XXXX-XXXX-1357` | all masked |
+| Injection | 5 attack patterns + 1 benign control | 5 rejected, control passed |
+| Output groundedness | deliberately injected unsupported claim | caught and refused |
+
+The masker is applied to **both** what the model sees and what is written to
+disk, so a fixed-format field never reaches a log in the clear.
+
+**Out of scope, as the brief states:** customer name and delivery address are
+free text with no reliable pattern under a keyless MOCK_LLM-only masker. They are
+recorded in `OUT_OF_SCOPE_PII` in `guardrails.py` as an explicit non-claim rather
+than pretend-covered. Only fabricated examples are used anywhere in this repo.
+
+### crewai 1.x adaptations (differences from the brief's 0.x wording)
+
+Probing the installed version (1.15.36) surfaced three differences that produce
+**silent** wrong behaviour rather than errors, so they are documented explicitly:
+
+| Brief says | Reality in crewai 1.15.36 | What this repo does |
+| --- | --- | --- |
+| `response_format` on the Task | **no such field** — `Task.model_fields` shows `output_pydantic` | uses `output_pydantic` **and** validates in code |
+| extend `BaseLLM` | correct, and it is a **Pydantic model** — config goes in model fields, and only `call` is abstract | `MockLLM(BaseLLM)` with Pydantic fields |
+| (implied) tool calling is automatic | `check_native_tool_support()` needs a callable `supports_function_calling()` or CrewAI silently falls back to text-ReAct | deliberately returns `False` to exercise ReAct, the path the brief's pitfalls concern |
+
+Both documented pitfalls are handled explicitly in `mock_llm.py`:
+the tool result is read **only from assistant-authored messages**
+(`_observation_from_own_output`), never by scanning the conversation — where the
+system prompt's own `Observation:` template would match on the very first call;
+and tool arguments are routed by **declared schema** (`_arguments_from_schema`),
+never by tool name.
+
+---
+
 ## Repository layout
 
 ```

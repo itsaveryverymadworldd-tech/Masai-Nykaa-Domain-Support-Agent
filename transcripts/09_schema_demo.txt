@@ -1,0 +1,50 @@
+==============================================================================
+TASK 9 -- STRUCTURED OUTPUT SCHEMA (Pydantic), VALIDATED IN CODE
+==============================================================================
+schema fields:
+    answer               <class 'str'>
+    grounded             <class 'bool'>
+    sources              list[str]
+    top_similarity       <class 'float'>
+    order_record_id      str | None
+    order_status         str | None
+    escalation_score     float | None
+    needs_human          <class 'bool'>
+    reason               <class 'str'>
+
+NOTE: the brief names `response_format`; in crewai 1.x that argument no
+longer exists on Task. `Task.model_fields` shows the equivalent is
+`output_pydantic`, which is what crew.py wires onto the composer task.
+
+##############################################################################
+# LIVE CREW RESPONSES
+##############################################################################
+
+QUERY : How long do I have to return a pair of shoes?
+  [OK] validated: grounded=True needs_human=False sources=['09_size_exchange', '01_return_window'] escalation_score=None
+
+QUERY : When will I get my money back for a cash on delivery order?
+  [OK] validated: grounded=True needs_human=False sources=['02_cod_refund_timelines', '06_order_cancellation', '01_return_window'] escalation_score=None
+
+QUERY : What is the status of order ORD-0037?   (record_id=ORD-0037)
+  [OK] validated: grounded=True needs_human=True sources=['05_warranty_terms', '06_order_cancellation', '10_damaged_item_claims'] escalation_score=0.697964
+
+##############################################################################
+# NEGATIVE CASES -- these MUST be rejected
+##############################################################################
+  [OK]   rejected  empty answer
+         -> ('answer',): Value error, answer must not be empty
+  [OK]   rejected  missing required field 'needs_human'
+         -> ('needs_human',): Field required
+  [OK]   rejected  escalation_score out of range
+         -> ('escalation_score',): Value error, escalation_score must be in [0,1], got 7.5
+  [OK]   rejected  top_similarity out of range
+         -> ('top_similarity',): Value error, top_similarity must be in [0,1], got -0.4
+  [OK]   rejected  wrong type for grounded
+         -> ('grounded',): Input should be a valid boolean, unable to interpret input
+
+==============================================================================
+RESULT: PASS
+  3/3 live crew responses validated against SupportResponse.
+  5/5 malformed payloads were rejected with a Pydantic ValidationError.
+==============================================================================

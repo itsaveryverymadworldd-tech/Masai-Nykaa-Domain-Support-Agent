@@ -1,0 +1,99 @@
+==============================================================================
+TASK 7 -- CREWAI CREW, TOOLS DEMONSTRABLY INVOKED VIA kickoff()
+==============================================================================
+LLM backend     : MOCK_LLM (crewai BaseLLM subclass, zero API keys)
+process         : sequential
+agents          : 3 (Policy Retrieval / Order Lookup / Response Composer)
+telemetry       : CREWAI_DISABLE_TELEMETRY='true', OTEL_SDK_DISABLED='true'
+
+------------------------------------------------------------------------------
+LEAST-AUTONOMY WIRING CHECK (Part 4, Application layer)
+------------------------------------------------------------------------------
+  agents total                     : 3
+  agents holding check_order_status: ['Order Lookup Specialist']
+  exactly one holder (Lookup Agent): True
+
+==============================================================================
+POLICY-ONLY QUERY  (must invoke rag_lookup, not check_order_status)
+==============================================================================
+query      : How long do I have to return a pair of shoes?
+record_id  : None
+
+llm calls  : 4
+tool dispatch log (every entry is routed by DECLARED SCHEMA, never by tool name):
+    agent='Policy Retrieval Specialist'
+      tool      = rag_lookup
+      arguments = {"query": "How long do I have to return a pair of shoes?"}
+      schema required keys = ['query']
+      dispatched by = declared_schema
+    agent='Order Lookup Specialist' -> NO TOOL CALL
+      reason    = tool schema requires 'record_id' but no ORD-#### id appears in the task text: 'No order record id was supplied for this conversation, so there is nothing to look up. Report that no order lookup was required.'
+
+tools invoked on this query: ['rag_lookup']
+
+FINAL CREW OUTPUT (validated against the Pydantic schema):
+{
+  "answer": "Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Nykaa accepts returns within a category-specific window measured from the date of delivery, not from the date the order was placed. Apparel, Footwear and Beauty items may be returned within 7 days of delivery.\n\n(Answered from: Return Window by Product Category, Size-Exchange Policy. Top match similarity 0.521 >= threshold 0.318.)",
+  "grounded": true,
+  "sources": [
+    "09_size_exchange",
+    "01_return_window"
+  ],
+  "top_similarity": 0.521149,
+  "order_record_id": null,
+  "order_status": null,
+  "escalation_score": null,
+  "needs_human": false,
+  "reason": "the retrieved policy context answers the question"
+}
+
+  [OK] response validates against SupportResponse
+
+==============================================================================
+ORDER QUERY  (must invoke check_order_status)
+==============================================================================
+query      : What is the current status of order ORD-0037, and should it be escalated to a human agent?
+record_id  : ORD-0037
+
+llm calls  : 5
+tool dispatch log (every entry is routed by DECLARED SCHEMA, never by tool name):
+    agent='Policy Retrieval Specialist'
+      tool      = rag_lookup
+      arguments = {"query": "What is the current status of order ORD-0037, and should it be escalated to a human agent?"}
+      schema required keys = ['query']
+      dispatched by = declared_schema
+    agent='Order Lookup Specialist'
+      tool      = check_order_status
+      arguments = {"record_id": "ORD-0037"}
+      schema required keys = ['record_id']
+      dispatched by = declared_schema
+
+tools invoked on this query: ['rag_lookup', 'check_order_status']
+
+FINAL CREW OUTPUT (validated against the Pydantic schema):
+{
+  "answer": "I don't have that in the Nykaa policy knowledge base, so I can't answer it reliably. I'd rather say I don't know than guess. Let me route this to a human support agent.",
+  "grounded": false,
+  "sources": [
+    "12_escalation_matrix",
+    "06_order_cancellation",
+    "05_warranty_terms"
+  ],
+  "top_similarity": 0.30522,
+  "order_record_id": "ORD-0037",
+  "order_status": "Shipped",
+  "escalation_score": 0.697964,
+  "needs_human": true,
+  "reason": "the knowledge base does not cover this question"
+}
+
+  [OK] response validates against SupportResponse
+
+==============================================================================
+RESULT: PASS
+  rag_lookup was invoked on the policy-only query.
+  check_order_status was invoked on the order query.
+  check_order_status was NOT invoked when no record id was supplied.
+  Every crew response validated against the SupportResponse schema.
+  check_order_status is wired to exactly one agent (least autonomy).
+==============================================================================

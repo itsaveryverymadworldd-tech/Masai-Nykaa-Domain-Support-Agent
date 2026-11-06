@@ -1,0 +1,59 @@
+==============================================================================
+TASK 8 -- SESSION MEMORY (LangChain RunnableWithMessageHistory)
+==============================================================================
+store          : MemoryStore of InMemoryChatMessageHistory
+scope          : in-process only (does not survive a restart)
+deprecation w. : 1 LangChainDeprecationWarning(s) observed at construction -- expected per the brief, not silenced
+
+##############################################################################
+# TRANSCRIPT A -- SAME SESSION, STATE CARRIED ACROSS TURNS
+##############################################################################
+
+--- session-A turn 1 ---
+CUSTOMER: How long do I have to return a pair of shoes?
+  history before this turn (0 message(s)):
+AGENT   : Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replacement size is dispatched once the original item has been collected by the return pickup, so the two steps are linked. Home products carry a 10-day return window, while Electronics may be return
+  history after this turn: 2 message(s)
+
+--- session-A turn 2 ---
+CUSTOMER: And what about Home products?
+  history before this turn (2 message(s)):
+    human: How long do I have to return a pair of shoes?
+    ai: Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of del
+AGENT   : Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may only be moved into Returned status if the request is raised inside the window that applies to its category. Home appliances run from 12 to 24 months depending on the brand, and Beauty devices s
+  history after this turn: 4 message(s)
+
+final history for session-A (4 messages):
+     human: How long do I have to return a pair of shoes?
+        ai: Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The
+     human: And what about Home products?
+        ai: Home products carry a 10-day return window, while Electronics may be returned within 14 days. An ord
+
+memory log:
+    [no memory] effective query 'How long do I have to return a pair of shoes?'
+    [memory applied] prior turn 'How long do I have to return a pair of shoes?' prepended -> effective query 'How long do I have to return a pair of shoes? And what about Home products?'
+
+##############################################################################
+# TRANSCRIPT B -- FRESH SESSION, SAME SECOND TURN, STATE ABSENT
+##############################################################################
+
+--- session-B-fresh turn 1 (the SAME question as session A turn 2) ---
+CUSTOMER: And what about Home products?
+  history before this turn: 0 message(s) (fresh, correctly empty)
+AGENT   : Home appliances run from 12 to 24 months depending on the brand, and Beauty devices such as trimmers, hair dryers and straighteners carry 6 to 12 months. Apparel, Footwear and cosmetics are not warrantied at all; for these categories the remedy is the return or size-exchange policy instead. Beauty, 
+
+memory log:
+    [no memory] effective query 'And what about Home products?'
+
+COMPARISON
+------------------------------------------------------------------------------
+  session A turn 2 effective query : How long do I have to return a pair of shoes? And what about Home products?
+  session B turn 1 effective query : And what about Home products?
+  A answers the Home return window : True
+  B does not carry that context    : False
+
+==============================================================================
+RESULT: PASS
+  Session A carried state across two turns (4 messages stored).
+  Session B started fresh, with no history, and did not carry it.
+==============================================================================

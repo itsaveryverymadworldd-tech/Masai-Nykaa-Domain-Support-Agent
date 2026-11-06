@@ -95,4 +95,8 @@ MOCK_LLM = True
 MAX_TOKENS_PER_REQUEST = 4096
 MAX_QUERY_CHARS = 2_000
 
-DEFAULT_ESCALATION_THRESHOLD = 0.60
+#: Escalation threshold, set at the 80th percentile of escalation_score over the
+#: generated dataset (scripts/06_escalation_score.py) -- not a round number.
+#: Measured: p80 = 0.3577, which selects 10/48 orders (20.8%); delayed orders
+#: score +0.4188 higher on average than non-delayed ones.
+DEFAULT_ESCALATION_THRESHOLD = 0.3577
