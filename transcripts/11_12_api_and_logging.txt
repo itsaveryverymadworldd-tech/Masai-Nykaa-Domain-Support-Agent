@@ -15,7 +15,7 @@ declared routes:
 ##############################################################################
 HTTP 200
 {
-  "trace_id": "bebedcd03f7c467f",
+  "trace_id": "b4cb17f315394efc",
   "allowed": true,
   "reject_reason": null,
   "response": {
@@ -34,11 +34,11 @@ HTTP 200
 ##############################################################################
 HTTP 200
 {
-  "trace_id": "adbadc935c2f429d",
+  "trace_id": "e722ccf5cef34e44",
   "allowed": false,
   "reject_reason": "input matched the 'instruction_override' injection rule",
   "response": null,
-  "duration_ms": 0.107
+  "duration_ms": 0.321
 }
 
 ##############################################################################
@@ -54,7 +54,7 @@ HTTP 200
 collections before : {'kb_fixed_overlap': 24, 'kb_sentence': 30}
 HTTP 200
 {
-  "trace_id": "3fa007c94de64ed3",
+  "trace_id": "041d5dd5a3174bb1",
   "doc_id": "99_gift_wrapping",
   "ok": true,
   "message": "document added and both collections re-indexed",
@@ -62,7 +62,7 @@ HTTP 200
     "kb_fixed_overlap": 25,
     "kb_sentence": 32
   },
-  "duration_ms": 1072.941
+  "duration_ms": 945.175
 }
 collections after  : {'kb_fixed_overlap': 25, 'kb_sentence': 32}
 both collections re-indexed and grew: True
@@ -75,15 +75,15 @@ GET /health -> HTTP 200: {"status": "ok", "mock_llm": true, "collections": ["kb_
 ##############################################################################
 -- client 1: two turns, then disconnects WITHOUT saying goodbye --
   turn 1: How long do I have to return a pair of shoes?
-    -> trace d87dcf08367f43a7, answered=True, 149.269 ms
+    -> trace 7d65539c16184e8e, answered=True, 116.817 ms
     -> Size exchanges apply to Apparel and Footwear only, and must be raised within 7 days of delivery. The replaceme...
   turn 2: And what about Home products?
-    -> trace 3cce93ffb96b4cd8, answered=True, 223.739 ms
+    -> trace d081cdde765e484d, answered=True, 100.07 ms
     -> Home products carry a 10-day return window, while Electronics may be returned within 14 days. An order may onl...
   [client 1 closing the socket mid-conversation now]
 
 -- client 2: connects AFTER that disconnect --
-  server still serving: trace ba2c6af215d84ffe, answered=True, 146.155 ms
+  server still serving: trace 8a691fa80bd54602, answered=True, 94.093 ms
   -> Warranty is a separate entitlement from the return window and does not extend it. Electronics carry the manufa...
   graceful close: {'type': 'closing', 'session_id': 'ws-demo-2'}
 
@@ -97,15 +97,15 @@ entries with a trace_id : 9/9
 entries with timing     : 9/9
 
 every line, in order (timestamp | trace | endpoint | status | ms):
-  19:03:54.008 | bebedcd03f7c467f | /ask           | ok                  |   2138.93
-  19:03:54.114 | 8f6788f9e0664e54 | /ask           | ok                  |    102.73
-  19:03:54.117 | adbadc935c2f429d | /ask           | rejected_guardrail  |      0.03
-  19:03:54.237 | a6c2cb10fd874d7e | /ask           | ok                  |    118.21
-  19:03:56.155 | 3fa007c94de64ed3 | /add-document  | ok                  |   1072.76
-  19:03:57.328 | d87dcf08367f43a7 | /ws/chat       | ok                  |    149.10
-  19:03:57.552 | 3cce93ffb96b4cd8 | /ws/chat       | ok                  |    223.58
-  19:03:57.553 | a7807ef2108c4fea | /ws/chat       | disconnect          |      0.00
-  19:03:57.702 | ba2c6af215d84ffe | /ws/chat       | ok                  |    145.98
+  19:42:29.353 | b4cb17f315394efc | /ask           | ok                  |   1895.15
+  19:42:29.454 | 484525410fbe448e | /ask           | ok                  |     98.29
+  19:42:29.461 | e722ccf5cef34e44 | /ask           | rejected_guardrail  |      0.07
+  19:42:29.588 | 0d5b40478ad04136 | /ask           | ok                  |    120.81
+  19:42:31.219 | 041d5dd5a3174bb1 | /add-document  | ok                  |    945.06
+  19:42:32.236 | 7d65539c16184e8e | /ws/chat       | ok                  |    116.70
+  19:42:32.337 | d081cdde765e484d | /ws/chat       | ok                  |     99.96
+  19:42:32.337 | 33352e61d2a445b5 | /ws/chat       | disconnect          |      0.00
+  19:42:32.433 | 8a691fa80bd54602 | /ws/chat       | ok                  |     93.94
 
 PII CHECK -- scanning for any unmasked value:
   whole-file search (phone forms)  : NONE
@@ -113,7 +113,7 @@ PII CHECK -- scanning for any unmasked value:
   [OK] no raw fixed-format PII value reached disk
 
 the masked form IS present, proving masking ran rather than being skipped:
-  a6c2cb10fd874d7e  My number is [PHONE_REDACTED] and the card [CARD_LAST4_REDACTED] was charged twice.
+  0d5b40478ad04136  My number is [PHONE_REDACTED] and the card [CARD_LAST4_REDACTED] was charged twice.
                 redactions: ['phone:98****10', 'card_last4:** 1']
 
 ==============================================================================
