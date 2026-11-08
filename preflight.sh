@@ -138,6 +138,7 @@ run_script "scripts/13_eval_judge.py     (Task 13 15-query evaluation)"         
 run_script "scripts/14_autogen_review.py (Task 14 Autogen review)"               scripts/14_autogen_review.py
 run_script "scripts/15_governance.py     (Task 15 governance)"                   scripts/15_governance.py
 run_script "scripts/16_caching.py        (Task 16 response caching)"             scripts/16_caching.py
+run_script "scripts/17_real_llm_demo.py  (optional real-LLM backend, mock mode)" scripts/17_real_llm_demo.py
 
 # --------------------------------------------------------------------------- #
 hdr "C. ACCEPTANCE CRITERIA"

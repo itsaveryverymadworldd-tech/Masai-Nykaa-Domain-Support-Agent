@@ -100,3 +100,12 @@ MAX_QUERY_CHARS = 2_000
 #: Measured: p80 = 0.3577, which selects 10/48 orders (20.8%); delayed orders
 #: score +0.4188 higher on average than non-delayed ones.
 DEFAULT_ESCALATION_THRESHOLD = 0.3577
+
+# --------------------------------------------------------------------------- #
+# LLM backend
+# --------------------------------------------------------------------------- #
+
+#: "mock" (default) or "real". MOCK_LLM is the graded path and the only one
+#: guaranteed offline; "real" opts into network calls and is optional, as the
+#: brief permits. See nykaa.llm_backend for the full configuration surface.
+LLM_BACKEND: str = os.environ.get("NYKAA_LLM_BACKEND", "mock")

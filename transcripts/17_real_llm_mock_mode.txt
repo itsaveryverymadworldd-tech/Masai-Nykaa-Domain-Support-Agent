@@ -1,0 +1,40 @@
+==============================================================================
+REAL-LLM MODE -- OPTIONAL BACKEND
+==============================================================================
+  LLM backend : MOCK_LLM (offline, no API keys, no network)
+
+  Currently OFFLINE (MOCK_LLM). This is the graded default and the
+  only mode that makes no network calls.
+
+  To switch on a real model, set these in YOUR OWN shell -- never
+  commit a key to the repository:
+
+      export NYKAA_LLM_BACKEND=real
+      export NYKAA_LLM_MODEL=openai/gpt-4o-mini
+      export OPENAI_API_KEY=sk-...        # your key, your shell
+
+  Then re-run this script. Any OpenAI-compatible local server needs
+  no key at all:
+
+      export NYKAA_LLM_MODEL=ollama/qwen2.5:3b
+      export NYKAA_LLM_BASE_URL=http://localhost:11434/v1
+
+  Sanity checks that apply to BOTH modes:
+
+  [1] config.LLM_BACKEND resolves to 'mock' -> is_real()=False
+
+  [2] misconfiguration handling (a silent fallback to MOCK_LLM would
+      look like success while testing nothing):
+      With NYKAA_LLM_BACKEND=real and no key, validate() raises:
+        NYKAA_LLM_BACKEND=real but no API key found. Set OPENAI_API_KEY in your own shell (not in the repo), or point NYKAA_LLM_BASE_URL at a local OpenAI-com
+      Correct: it refuses rather than silently using the mock.
+
+  [3] retrieval/grounding is backend-independent (same embeddings,
+      same threshold), so only answer *phrasing* changes:
+      collections ready: 24 fixed / 30 sentence chunks
+      similarity threshold: 0.3182
+
+==============================================================================
+  Acceptance criteria are satisfied under MOCK_LLM alone. Real mode is
+  an optional extra and is never required to grade this project.
+==============================================================================

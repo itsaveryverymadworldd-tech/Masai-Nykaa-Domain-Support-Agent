@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from nykaa import config
+from nykaa import config, llm_backend
 from nykaa.mock_llm import MockLLM
 from nykaa.tools import build_check_order_status_tool, build_rag_lookup_tool
 
@@ -37,9 +37,16 @@ class CrewRun:
         return [a["tool"] for a in self.action_log if a.get("tool")]
 
 
-def build_agents(llm: MockLLM):
-    """Construct the three agents. Returns ``(retrieval, lookup, composer)``."""
+def build_agents(llm: Any = None):
+    """Construct the three agents. Returns ``(retrieval, lookup, composer)``.
+
+    ``llm`` defaults to whatever :mod:`nykaa.llm_backend` selects: the offline
+    ``MockLLM`` unless ``NYKAA_LLM_BACKEND=real`` was set.
+    """
     from crewai import Agent
+
+    if llm is None:
+        llm = llm_backend.build_crew_llm()
 
     rag_tool = build_rag_lookup_tool()
     status_tool = build_check_order_status_tool()
@@ -102,7 +109,7 @@ def run_crew(query: str, record_id: str | None = None) -> CrewRun:
 
     from nykaa.schemas import SupportResponse
 
-    llm = MockLLM(model="mock-llm")
+    llm = llm_backend.build_crew_llm()
     retrieval_agent, lookup_agent, composer_agent = build_agents(llm)
 
     retrieval_task = Task(
@@ -155,12 +162,14 @@ def run_crew(query: str, record_id: str | None = None) -> CrewRun:
     )
 
     result = crew.kickoff()
+    # MockLLM exposes action_log/calls; a real LLM does not, so both are read
+    # defensively -- the crew must work identically under either backend.
     return CrewRun(
         query=query,
         record_id=record_id,
         result=result,
-        action_log=list(llm.action_log),
-        llm_calls=llm.calls,
+        action_log=list(getattr(llm, "action_log", []) or []),
+        llm_calls=int(getattr(llm, "calls", 0) or 0),
     )
 
 

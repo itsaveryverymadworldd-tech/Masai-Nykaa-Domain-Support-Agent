@@ -46,6 +46,7 @@ from autogen_core.models import (
 )
 from pydantic import BaseModel, Field
 
+from nykaa import llm_backend
 from nykaa.guardrails import check_groundedness
 
 # --------------------------------------------------------------------------- #
@@ -258,7 +259,7 @@ class ReviewOutcome:
     client_calls: int = 0
 
 
-def build_review_team(client: MockReviewClient):
+def build_review_team(client: Any):
     """Construct the 2-agent Round Robin review team."""
     from autogen_agentchat.agents import AssistantAgent
     from autogen_agentchat.messages import StructuredMessage
@@ -306,7 +307,7 @@ def build_review_team(client: MockReviewClient):
 async def _run(draft: str, context: list[str]) -> ReviewOutcome:
     from autogen_agentchat.base import TaskResult
 
-    client = MockReviewClient()
+    client = llm_backend.build_autogen_client()
     team = build_review_team(client)
 
     payload = json.dumps({"draft": draft, "context": context})
@@ -338,7 +339,8 @@ async def _run(draft: str, context: list[str]) -> ReviewOutcome:
         draft=draft,
         verdict=verdict,
         transcript=transcript,
-        client_calls=client.calls,
+        # MockReviewClient counts calls; a real client does not expose that.
+        client_calls=int(getattr(client, "calls", 0) or 0),
     )
 
 
