@@ -11,12 +11,12 @@ scope      : in-process only
 
 call 1 (cache MISS expected)
     underlying generator calls so far : 1
-    elapsed                           : 35.21 ms
+    elapsed                           : 13.59 ms
     top_similarity                    : 0.5211
 
 call 2 (cache HIT expected)
     underlying generator calls so far : 1
-    elapsed                           : 0.04 ms
+    elapsed                           : 0.01 ms
     top_similarity                    : 0.5211
 
 EVIDENCE:
@@ -25,7 +25,7 @@ EVIDENCE:
     cache misses                    : 1
     hit rate                        : 0.5000
     identical result object returned: True
-    speedup on the hit              : 897.9x (35.21 ms -> 0.04 ms)
+    speedup on the hit              : 1472.8x (13.59 ms -> 0.01 ms)
 
 ##############################################################################
 # NORMALISATION -- a trivially different phrasing still hits
@@ -55,5 +55,5 @@ FINAL CACHE REPORT
 RESULT: PASS
   A repeated identical query produced a real cache hit, avoiding a
   redundant grounded-generation call: 2 hits across 4 lookups left the underlying generator at
-  only 2 call(s), with a 897.9x speedup on the hit.
+  only 2 call(s), with a 1472.8x speedup on the hit.
 ==============================================================================
