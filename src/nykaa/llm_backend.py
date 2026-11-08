@@ -150,6 +150,15 @@ def build_crew_llm() -> Any:
     return LLM(**kwargs)
 
 
+#: Recognised OpenAI model-name prefixes. Autogen ships capability metadata for
+#: these only; anything else needs its capabilities declared by hand.
+_OPENAI_MODEL_PREFIXES = ("gpt-", "o1", "o3", "o4", "chatgpt", "text-", "davinci")
+
+
+def _needs_model_info(model: str) -> bool:
+    return not model.lower().startswith(_OPENAI_MODEL_PREFIXES)
+
+
 def build_autogen_client() -> Any:
     """The model client the Autogen review team uses."""
     if not is_real():
@@ -172,6 +181,22 @@ def build_autogen_client() -> Any:
     elif url:
         # Local servers usually ignore the key but the client insists on one.
         kwargs["api_key"] = "not-needed"
+
+    # Autogen only bundles capability metadata for built-in OpenAI model names.
+    # A local or third-party model (e.g. "qwen2.5:3b" on Ollama) otherwise fails
+    # at construction with:
+    #   ValueError: model_info is required when model name is not a valid
+    #   OpenAI model
+    if _needs_model_info(model):
+        from autogen_core.models import ModelInfo
+
+        kwargs["model_info"] = ModelInfo(
+            vision=False,
+            function_calling=True,
+            json_output=True,
+            structured_output=True,
+            family="unknown",
+        )
     return OpenAIChatCompletionClient(**kwargs)
 
 
